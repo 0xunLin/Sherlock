@@ -1,0 +1,393 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sherlock: Chain Analysis</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+    <!-- Persistent floating nav -->
+    <div class="theme-toggle-container">
+        <button id="theme-toggle" class="theme-btn" title="Toggle Victorian Theme">VICTORIAN MODE</button>
+    </div>
+    <div class="fixed-nav">
+        <a href="#hero" class="nav-pill active" data-target="hero">CHAIN ANALYSIS</a>
+        <a href="#intro" class="nav-pill" data-target="intro">INTRO</a>
+        <a href="#examples" class="nav-pill" data-target="examples">HEURISTICS</a>
+        <a href="#conclusion" class="nav-pill" data-target="conclusion">SO WHAT?!</a>
+        <a href="#dashboard-section" class="nav-pill dashboard-pill" data-target="dashboard-section">DASHBOARD</a>
+    </div>
+
+    <!-- Persistent functional links on the left -->
+    <div class="fixed-socials">
+        <a href="#dashboard-section" class="icon poop-icon tooltip-container" title="Dashboard">🕵️</a>
+        <button id="btn-glossary" class="icon social-icon tooltip-container" title="Information Glossary">ig</button>
+        <button id="btn-tracer" class="icon social-icon tooltip-container" title="Transaction Tracer">tt</button>
+        <button id="btn-import" class="icon social-icon tooltip-container" title="Import New Block">in</button>
+    </div>
+
+    <div class="scroll-container">
+        <!-- Section 1: Hero -->
+        <section id="hero" class="slide hero-slide">
+            <div class="grid-background"></div>
+            <div class="background-text top-text">CHAIN</div>
+            <div class="dictionary-container" style="display:flex; align-items:center; gap:20px; z-index:10;">
+                <div class="dictionary-card">
+                    <div id="dict-content">
+                        <h1>heuristic</h1>
+                        <p class="pronunciation">[hyoo-ris-tik] <em>noun</em></p>
+                        <hr>
+                        <p class="definition">
+                            Rules of thumb or probabilistic algorithms used to link addresses to entities or identify
+                            the true
+                            nature of a Bitcoin transaction.
+                        </p>
+                        <p class="see-also">See also: <em>Common Input Ownership, Change Detection</em>.</p>
+                        <div class="variation">
+                            <p>Variation: confident estimation</p>
+                            <p>“We apply heuristics to follow the money.”</p>
+                        </div>
+                    </div>
+                </div>
+                <button id="dict-next" class="dict-nav-btn">&gt;</button>
+            </div>
+            <div class="background-text left-text">ANALYSIS</div>
+            <div class="background-text right-text">ENGINE</div>
+            <div class="background-text bottom-text">SHERLOCK</div>
+            <a href="#intro" class="scroll-down-btn mono-text">SCROLL DOWN</a>
+        </section>
+
+        <!-- Section 2: Intro -->
+        <section id="intro" class="slide intro-slide">
+            <div class="grid-background"></div>
+            <div class="mac-window">
+                <div class="mac-window-header">
+                    <div class="mac-dots">
+                        <span class="dot red"></span>
+                        <span class="dot yellow"></span>
+                        <span class="dot green"></span>
+                    </div>
+                    <div class="window-title mono-text">INDEX</div>
+                </div>
+                <div class="mac-window-body mono-text">
+                    <p>FROM: SHERLOCK ENGINE</p>
+                    <p>SUBJECT: PROJECT INTRO</p>
+                    <br>
+                    <h2>DEAR USER, WE ARE TAUGHT THAT THE BLOCKCHAIN IS COMPLETELY PRIVATE AND PSEUDONYMOUS. BUT OVER
+                        TIME, WALLET BEHAVIORS AND PATTERNS REVEAL IDENTITIES. WE WILL LOOK AT A FEW HEURISTICS TO LEARN
+                        HOW TO NOTICE THIS.</h2>
+                    <br>
+                    <p class="muted">All examples are based on real on-chain heuristics. Any resemblance to real
+                        entities is probabilistic.</p>
+                    <br>
+                    <p>BEST,<br>SHERLOCK DEV TEAM (ME)</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section 3: Examples -->
+        <section id="examples" class="slide examples-slide">
+            <div class="grid-background"></div>
+            <div class="examples-container">
+                <!-- Example 1 -->
+                <div class="phone-mockup phone-1">
+                    <div class="phone-notch"></div>
+                    <div class="phone-content">
+                        <h3 class="phone-brand mono-text">.cioh</h3>
+                        <div class="floating-bubble green" style="top: 20%; left: -10px;">🙂</div>
+                        <div class="floating-text" style="top: 30%; right: 10px;">Common Input</div>
+                        <div class="floating-text" style="top: 45%; left: 10px;">Ownership</div>
+                        <div class="floating-bubble red" style="top: 50%; right: 20px;">😵‍💫</div>
+
+                        <div class="main-copy">
+                            <h2 class="bold-brand">They belong together!</h2>
+                            <p>If multiple inputs are spent in one transaction, they are highly likely controlled by the
+                                exact same wallet.</p>
+                        </div>
+                        <div class="dots-nav"><span></span><span class="active"></span><span></span></div>
+                    </div>
+                </div>
+                <!-- Example 2 -->
+                <div class="phone-mockup phone-2">
+                    <div class="phone-notch"></div>
+                    <div class="phone-content">
+                        <h3 class="phone-brand mono-text">.change</h3>
+                        <div class="floating-text" style="top: 25%; left: 0px;">Script Types</div>
+                        <div class="floating-bubble red" style="top: 25%; right: 20px;">🕵️</div>
+                        <div class="floating-bubble green" style="top: 45%; left: 10px;">💰</div>
+                        <div class="floating-text" style="top: 45%; right: 0px;">Round Numbers</div>
+
+                        <div class="main-copy">
+                            <h2 class="bold-brand">Where's the change?</h2>
+                            <p>Matching script types, round output values, or index position can identify which output
+                                is the change returning to the sender.</p>
+                            <button class="mock-btn style-blue">Analyze Change</button>
+                        </div>
+                        <div class="dots-nav"><span class="active"></span><span></span><span></span></div>
+                    </div>
+                </div>
+                <!-- Example 3 -->
+                <div class="phone-mockup phone-3">
+                    <div class="phone-notch"></div>
+                    <div class="phone-content">
+                        <h3 class="phone-brand mono-text">.coinjoin</h3>
+                        <div class="floating-bubble red" style="top: 25%; left: 10px;">👻</div>
+                        <div class="floating-text" style="top: 35%; left: 10px;">Obfuscation</div>
+                        <div class="floating-bubble green" style="top: 45%; right: 20px;">🤝</div>
+                        <div class="floating-text" style="top: 55%; right: 10px;">Equal Values</div>
+
+                        <div class="main-copy">
+                            <h2 class="bold-brand">Hiding in the crowd</h2>
+                            <p>Many participants group up to mix their coins into equal-value outputs to obscure the
+                                trail.</p>
+                            <button class="mock-btn style-blue">Detect Mixers</button>
+                        </div>
+                        <div class="dots-nav"><span></span><span></span><span class="active"></span></div>
+                    </div>
+                </div>
+            </div>
+            <div class="bottom-left-card mono-text">
+                <p>POWERED BY <strong>.sherlock</strong></p>
+                <p>APPLYING PROBABILISTIC TRANSACTIONS<br>TO THE BLOCKCHAIN EXPERIENCE</p>
+            </div>
+            <a href="#conclusion" class="bottom-right-btn mono-text">NEXT: SO WHAT?!</a>
+        </section>
+
+        <!-- Section 4: Conclusion -->
+        <section id="conclusion" class="slide conclusion-slide">
+            <div class="grid-background"></div>
+            <div class="mac-window">
+                <div class="mac-window-header">
+                    <div class="mac-dots">
+                        <span class="dot red"></span>
+                        <span class="dot yellow"></span>
+                        <span class="dot green"></span>
+                    </div>
+                    <div class="window-title mono-text">INDEX</div>
+                </div>
+                <div class="mac-window-body mono-text">
+                    <p>FROM: SHERLOCK TEAM</p>
+                    <p>SUBJECT: WHAT WE HAVE LEARNED</p>
+                    <br>
+                    <h2>NOT ALL INFO IN THE BLOCKCHAIN IS OBVIOUS. SOME APPEAR SLOWLY, AS PART OF HEURISTIC ANALYSIS.
+                        LET'S DIVE INTO REAL BLOCKS — AND SEE THE RESULTS.</h2>
+                    <br>
+                    <p>BEST,<br>SHERLOCK DEV</p>
+
+                    <div class="mac-footer-action">
+                        <p class="muted">Check out our parsed block visualizer.</p>
+                        <a href="#dashboard-section" class="dark-btn">EXPLORE DASHBOARD</a>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section 5: Dashboard -->
+        <section id="dashboard-section" class="slide dashboard-slide">
+            <div class="dash-mac-window">
+                <div class="mac-window-header dash-header-bar">
+                    <div class="mac-dots">
+                        <span class="dot red"></span>
+                        <span class="dot yellow"></span>
+                        <span class="dot green"></span>
+                    </div>
+                    <div class="dash-header-content">
+                        <select id="file-selector" class="mono-text dash-select" disabled>
+                            <option value="">Loading files...</option>
+                        </select>
+                        <div id="file-subtitle" class="dash-subtitle mono-text">Chain Data Browser</div>
+                    </div>
+                </div>
+
+                <div class="dash-body">
+                    <div id="loading-state" class="dash-message mono-text">
+                        <div class="spinner"></div><br>Analyzing blockchain data...
+                    </div>
+
+                    <div id="empty-state" class="dash-message mono-text">
+                        Please select a compiled block file from the dropdown to continue.
+                    </div>
+
+                    <div id="dashboard-content" style="display: none;">
+                        <div class="dash-stats mono-text">
+                            <div class="dash-stat">
+                                <div class="stat-lbl">TOTAL TXS</div>
+                                <div class="stat-val" id="stat-total">-</div>
+                            </div>
+                            <div class="dash-stat">
+                                <div class="stat-lbl">FLAGGED</div>
+                                <div class="stat-val warning" id="stat-flagged">-</div>
+                            </div>
+                            <div class="dash-stat">
+                                <div class="stat-lbl">AVG FEE (sat/vB)</div>
+                                <div class="stat-val" id="stat-fee">-</div>
+                            </div>
+                            <div class="dash-stat">
+                                <div class="stat-lbl">HEURISTICS</div>
+                                <div class="stat-val" id="stat-heuristics">-</div>
+                            </div>
+                        </div>
+
+                        <div class="dash-filters mono-text"
+                            style="display: flex; gap: 15px; margin-bottom: 20px; align-items: center;">
+                            <label for="tx-filter">Filter Txs:</label>
+                            <select id="tx-filter" class="dash-select" style="min-width: 200px;">
+                                <option value="all">All Notable</option>
+                                <option value="coinjoin">CoinJoin</option>
+                                <option value="consolidation">Consolidation</option>
+                                <option value="simple_payment">Simple Payment</option>
+                                <option value="self_transfer">Self Transfer</option>
+                                <option value="batch_payment">Batch Payment</option>
+                                <option value="op_return">OP_RETURN (Heuristic)</option>
+                                <option value="flagged">Any Heuristic Fired</option>
+                            </select>
+                        </div>
+
+                        <div class="dash-tab-container">
+                            <div class="dash-tabs mono-text" id="block-nav-list">
+                                <!-- Tabs go here -->
+                            </div>
+                        </div>
+
+                        <div id="blocks-container" class="dash-blocks-view">
+                            <!-- Block contents go here -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <!-- Modal for Transaction Details -->
+    <div id="tx-modal" class="modal-overlay" style="display: none;">
+        <div class="mac-window modal-window" style="max-width: 600px; max-height: 80vh;">
+            <div class="mac-window-header">
+                <div class="mac-dots">
+                    <span class="dot red"></span>
+                    <span class="dot yellow"></span>
+                    <span class="dot green"></span>
+                </div>
+                <div class="window-title mono-text" style="flex:1; text-align:center;">TX DETAILS</div>
+                <button id="close-modal" class="modal-close">&times;</button>
+            </div>
+            <div class="mac-window-body mono-text" id="modal-body" style="overflow-y:auto;">
+                <!-- Details -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal for All Blocks Selection -->
+    <div id="blocks-modal" class="modal-overlay" style="display: none;">
+        <div class="mac-window modal-window" style="max-width: 600px; max-height: 80vh;">
+            <div class="mac-window-header">
+                <div class="mac-dots">
+                    <span class="dot red"></span>
+                    <span class="dot yellow"></span>
+                    <span class="dot green"></span>
+                </div>
+                <div class="window-title mono-text" style="flex:1; text-align:center;">SELECT BLOCK</div>
+                <button id="close-blocks-modal" class="modal-close">&times;</button>
+            </div>
+            <div class="mac-window-body mono-text" id="blocks-modal-body"
+                style="overflow-y:auto; padding: 20px; display: flex; flex-wrap: wrap; gap: 10px;">
+                <!-- Block buttons -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal for Information Glossary (ig) -->
+    <div id="glossary-modal" class="modal-overlay" style="display: none;">
+        <div class="mac-window modal-window"
+            style="max-width: 700px; max-height: 80vh; display: flex; flex-direction: column;">
+            <div class="mac-window-header">
+                <div class="mac-dots">
+                    <span class="dot red"></span>
+                    <span class="dot yellow"></span>
+                    <span class="dot green"></span>
+                </div>
+                <div class="window-title mono-text" style="flex:1; text-align:center;">INFORMATION GLOSSARY</div>
+                <button id="close-glossary-modal" class="modal-close">&times;</button>
+            </div>
+            <div class="mac-window-body"
+                style="padding: 20px; flex: 1; display: flex; flex-direction: column; overflow: hidden;">
+                <input type="text" id="glossary-search" class="mono-text dash-select"
+                    style="width: 100%; margin-bottom: 20px; padding: 10px;" placeholder="Search term...">
+                <div id="glossary-content" style="overflow-y: auto; flex: 1;">
+                    <!-- Glossary items populated via JS -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal for Transaction Tracer (tt) -->
+    <div id="tracer-modal" class="modal-overlay" style="display: none;">
+        <div class="mac-window modal-window" style="max-width: 600px;">
+            <div class="mac-window-header">
+                <div class="mac-dots">
+                    <span class="dot red"></span>
+                    <span class="dot yellow"></span>
+                    <span class="dot green"></span>
+                </div>
+                <div class="window-title mono-text" style="flex:1; text-align:center;">TX TRACER</div>
+                <button id="close-tracer-modal" class="modal-close">&times;</button>
+            </div>
+            <div class="mac-window-body mono-text" style="padding: 30px;">
+                <p style="margin-bottom: 20px;">Paste a TXID to trace it within the currently loaded blocks.</p>
+                <div style="display: flex; gap: 10px; margin-bottom: 20px;">
+                    <input type="text" id="tracer-input" class="mono-text dash-select" style="flex: 1; padding: 10px;"
+                        placeholder="Enter exactly 64-character TXID...">
+                    <button id="btn-trace" class="dark-btn">TRACE</button>
+                </div>
+                <div id="tracer-status" style="font-weight: bold;"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal for Import New (in) -->
+    <div id="import-modal" class="modal-overlay" style="display: none;">
+        <div class="mac-window modal-window" style="max-width: 500px;">
+            <div class="mac-window-header">
+                <div class="mac-dots">
+                    <span class="dot red"></span>
+                    <span class="dot yellow"></span>
+                    <span class="dot green"></span>
+                </div>
+                <div class="window-title mono-text" style="flex:1; text-align:center;">IMPORT NEW FILE</div>
+                <button id="close-import-modal" class="modal-close">&times;</button>
+            </div>
+            <div class="mac-window-body mono-text" style="text-align: center;">
+                <p style="margin-bottom: 20px;">Select the required <code>.dat</code> files to parse and analyze.</p>
+                <div
+                    style="border: 2px dashed var(--border-strong); padding: 20px; border-radius: 8px; margin-bottom: 20px; display: flex; flex-direction: column; gap: 15px; text-align: left;">
+                    <div style="display: flex; align-items: center;">
+                        <input type="file" id="blk-file-input" accept=".dat" style="display: none;">
+                        <button class="dark-btn" style="width: 120px; font-size: 0.8rem;"
+                            onclick="document.getElementById('blk-file-input').click()">BLK FILE</button>
+                        <span id="blk-file-name" class="muted" style="margin-left: 15px;">Missing blk*.dat</span>
+                    </div>
+                    <div style="display: flex; align-items: center;">
+                        <input type="file" id="rev-file-input" accept=".dat" style="display: none;">
+                        <button class="dark-btn" style="width: 120px; font-size: 0.8rem;"
+                            onclick="document.getElementById('rev-file-input').click()">REV FILE</button>
+                        <span id="rev-file-name" class="muted" style="margin-left: 15px;">Missing rev*.dat</span>
+                    </div>
+                    <div style="display: flex; align-items: center;">
+                        <input type="file" id="xor-file-input" accept=".dat" style="display: none;">
+                        <button class="dark-btn" style="width: 120px; font-size: 0.8rem;"
+                            onclick="document.getElementById('xor-file-input').click()">XOR FILE</button>
+                        <span id="xor-file-name" class="muted" style="margin-left: 15px;">Missing xor.dat</span>
+                    </div>
+                </div>
+                <button id="btn-upload-file" class="mock-btn style-blue" disabled>ANALYZE FILES</button>
+                <div id="upload-status" style="margin-top: 15px; font-weight: bold;"></div>
+            </div>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+
+</html>
