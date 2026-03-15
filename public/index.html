@@ -15,9 +15,10 @@
     </div>
     <div class="fixed-nav">
         <a href="#hero" class="nav-pill active" data-target="hero">CHAIN ANALYSIS</a>
-        <a href="#intro" class="nav-pill" data-target="intro">INTRO</a>
+        <a href="https://github.com/SummerOfBitcoin/2026-developer-challenge-3-sherlock-0xunLin/blob/main/APPROACH.md"
+            target="_blank" class="nav-pill" title="Read the approach document">APPROACH</a>
+        <a href="manual.html" class="nav-pill" title="Read the project manual">MANUAL</a>
         <a href="#examples" class="nav-pill" data-target="examples">HEURISTICS</a>
-        <a href="#conclusion" class="nav-pill" data-target="conclusion">SO WHAT?!</a>
         <a href="#dashboard-section" class="nav-pill dashboard-pill" data-target="dashboard-section">DASHBOARD</a>
     </div>
 
@@ -57,35 +58,7 @@
             <div class="background-text left-text">ANALYSIS</div>
             <div class="background-text right-text">ENGINE</div>
             <div class="background-text bottom-text">SHERLOCK</div>
-            <a href="#intro" class="scroll-down-btn mono-text">SCROLL DOWN</a>
-        </section>
-
-        <!-- Section 2: Intro -->
-        <section id="intro" class="slide intro-slide">
-            <div class="grid-background"></div>
-            <div class="mac-window">
-                <div class="mac-window-header">
-                    <div class="mac-dots">
-                        <span class="dot red"></span>
-                        <span class="dot yellow"></span>
-                        <span class="dot green"></span>
-                    </div>
-                    <div class="window-title mono-text">INDEX</div>
-                </div>
-                <div class="mac-window-body mono-text">
-                    <p>FROM: SHERLOCK ENGINE</p>
-                    <p>SUBJECT: PROJECT INTRO</p>
-                    <br>
-                    <h2>DEAR USER, WE ARE TAUGHT THAT THE BLOCKCHAIN IS COMPLETELY PRIVATE AND PSEUDONYMOUS. BUT OVER
-                        TIME, WALLET BEHAVIORS AND PATTERNS REVEAL IDENTITIES. WE WILL LOOK AT A FEW HEURISTICS TO LEARN
-                        HOW TO NOTICE THIS.</h2>
-                    <br>
-                    <p class="muted">All examples are based on real on-chain heuristics. Any resemblance to real
-                        entities is probabilistic.</p>
-                    <br>
-                    <p>BEST,<br>SHERLOCK DEV TEAM (ME)</p>
-                </div>
-            </div>
+            <a href="#examples" class="scroll-down-btn mono-text">SCROLL DOWN</a>
         </section>
 
         <!-- Section 3: Examples -->
@@ -153,36 +126,7 @@
                 <p>POWERED BY <strong>.sherlock</strong></p>
                 <p>APPLYING PROBABILISTIC TRANSACTIONS<br>TO THE BLOCKCHAIN EXPERIENCE</p>
             </div>
-            <a href="#conclusion" class="bottom-right-btn mono-text">NEXT: SO WHAT?!</a>
-        </section>
-
-        <!-- Section 4: Conclusion -->
-        <section id="conclusion" class="slide conclusion-slide">
-            <div class="grid-background"></div>
-            <div class="mac-window">
-                <div class="mac-window-header">
-                    <div class="mac-dots">
-                        <span class="dot red"></span>
-                        <span class="dot yellow"></span>
-                        <span class="dot green"></span>
-                    </div>
-                    <div class="window-title mono-text">INDEX</div>
-                </div>
-                <div class="mac-window-body mono-text">
-                    <p>FROM: SHERLOCK TEAM</p>
-                    <p>SUBJECT: WHAT WE HAVE LEARNED</p>
-                    <br>
-                    <h2>NOT ALL INFO IN THE BLOCKCHAIN IS OBVIOUS. SOME APPEAR SLOWLY, AS PART OF HEURISTIC ANALYSIS.
-                        LET'S DIVE INTO REAL BLOCKS — AND SEE THE RESULTS.</h2>
-                    <br>
-                    <p>BEST,<br>SHERLOCK DEV</p>
-
-                    <div class="mac-footer-action">
-                        <p class="muted">Check out our parsed block visualizer.</p>
-                        <a href="#dashboard-section" class="dark-btn">EXPLORE DASHBOARD</a>
-                    </div>
-                </div>
-            </div>
+            <a href="#dashboard-section" class="bottom-right-btn mono-text">NEXT: EXPLORE DASHBOARD</a>
         </section>
 
         <!-- Section 5: Dashboard -->
@@ -236,13 +180,25 @@
                             <label for="tx-filter">Filter Txs:</label>
                             <select id="tx-filter" class="dash-select" style="min-width: 200px;">
                                 <option value="all">All Notable</option>
-                                <option value="coinjoin">CoinJoin</option>
-                                <option value="consolidation">Consolidation</option>
-                                <option value="simple_payment">Simple Payment</option>
-                                <option value="self_transfer">Self Transfer</option>
-                                <option value="batch_payment">Batch Payment</option>
-                                <option value="op_return">OP_RETURN (Heuristic)</option>
                                 <option value="flagged">Any Heuristic Fired</option>
+                                <optgroup label="— By Classification —">
+                                    <option value="simple_payment">Simple Payment</option>
+                                    <option value="consolidation">Consolidation</option>
+                                    <option value="coinjoin">CoinJoin</option>
+                                    <option value="self_transfer">Self Transfer</option>
+                                    <option value="batch_payment">Batch Payment</option>
+                                </optgroup>
+                                <optgroup label="— By Heuristic —">
+                                    <option value="h_cioh">CIOH</option>
+                                    <option value="h_change_detection">Change Detection</option>
+                                    <option value="h_address_reuse">Address Reuse</option>
+                                    <option value="h_round_number_payment">Round Number Payment</option>
+                                    <option value="h_coinjoin">CoinJoin Detection</option>
+                                    <option value="h_consolidation">Consolidation Detection</option>
+                                    <option value="h_self_transfer">Self-Transfer Detection</option>
+                                    <option value="h_op_return">OP_RETURN</option>
+                                    <option value="h_peeling_chain">Peeling Chain</option>
+                                </optgroup>
                             </select>
                         </div>
 

@@ -59,6 +59,46 @@ document.addEventListener('DOMContentLoaded', () => {
             seeAlso: "See also: <em>Address Reuse, UTXO Management</em>.",
             variationHeading: "Variation: internal movement",
             variationQuote: "“It looks like a payment, but it was just a self transfer.”"
+        },
+        {
+            word: "round number payment",
+            pronunciation: "[round num-ber pey] <em>noun</em>",
+            definition: "An output matching a human-readable round amount (like 0.05 BTC), often identifying the true payment rather than the change.",
+            seeAlso: "See also: <em>Change Detection</em>.",
+            variationHeading: "Variation: human behavior",
+            variationQuote: "“The round output was clearly the payment.”"
+        },
+        {
+            word: "op return",
+            pronunciation: "[op ri-turn] <em>noun</em>",
+            definition: "A script opcode used to mark an output as provably unspendable, often used to embed arbitrary data like text or digital artifacts.",
+            seeAlso: "See also: <em>Inscriptions, Data Storage</em>.",
+            variationHeading: "Variation: blockchain graffiti",
+            variationQuote: "“They embedded a message in the chain using an op_return.”"
+        },
+        {
+            word: "peeling chain",
+            pronunciation: "[pee-ling cheyn] <em>noun</em>",
+            definition: "A series of transactions where a large amount is slowly 'peeled' off into smaller payments across many steps, often to obscure the final destination.",
+            seeAlso: "See also: <em>Mixers, Change Outputs</em>.",
+            variationHeading: "Variation: structured smurfing",
+            variationQuote: "“The stolen funds were laundered through a long peeling chain.”"
+        },
+        {
+            word: "common input ownership",
+            pronunciation: "[CIOH] <em>noun</em>",
+            definition: "A heuristic assuming all inputs to a transaction belong to the same entity, as they are signed together.",
+            seeAlso: "See also: <em>CoinJoin</em>.",
+            variationHeading: "Variation: clustering",
+            variationQuote: "“CIOH clustered addresses to one user.”"
+        },
+        {
+            word: "address reuse",
+            pronunciation: "[ad-dres ree-yoos] <em>noun</em>",
+            definition: "The practice of using the same Bitcoin address to receive or send funds multiple times, severely compromising the privacy of the user.",
+            seeAlso: "See also: <em>Self Transfer, Privacy</em>.",
+            variationHeading: "Variation: privacy leak",
+            variationQuote: "“Address reuse makes it easy to track their entire payment history.”"
         }
     ];
 
@@ -73,6 +113,12 @@ document.addEventListener('DOMContentLoaded', () => {
             dictContent.classList.remove('dict-fade');
             void dictContent.offsetWidth; // trigger reflow
             dictContent.classList.add('dict-fade');
+
+            if (def.word === "round number payment" || def.word === "common input ownership") {
+                dictContent.classList.add('compact-card');
+            } else {
+                dictContent.classList.remove('compact-card');
+            }
 
             dictContent.innerHTML = `
                 <h1>${def.word}</h1>
@@ -91,9 +137,9 @@ document.addEventListener('DOMContentLoaded', () => {
     // ---- Theme Toggle Logic ----
     const themeBtn = document.getElementById('theme-toggle');
     if (themeBtn) {
-        // Load preference
-        const isVictorian = localStorage.getItem('victorianTheme') === 'true';
-        if (isVictorian) {
+        // Load preference — Victorian is the default on first visit
+        const isModern = localStorage.getItem('victorianTheme') === 'false';
+        if (!isModern) {
             document.body.classList.add('victorian-theme');
             themeBtn.textContent = 'MODERN MODE';
         }
@@ -145,25 +191,52 @@ document.addEventListener('DOMContentLoaded', () => {
     function renderGlossary(filter = '') {
         const terms = [
             { term: 'Address Reuse', def: 'A privacy-damaging practice where an entity receives and sends from the identical address.' },
-            { term: 'Batch Payment', def: 'An exchange or service paying many different users in a single transaction.' },
+            { term: 'Block', def: 'A collection of confirmed transactions bundled together and added to the blockchain.' },
+            { term: 'Block Hash', def: 'A unique cryptographic identifier for a specific block.' },
+            { term: 'Blockchain', def: 'A distributed public ledger containing the history of every Bitcoin transaction.' },
             { term: 'Change Detection', def: 'Identifying which output returns funds to the sender by looking for matching script types or odd values.' },
+            { term: 'Coinbase Transaction', def: 'The first transaction in a block, created by the miner, which generates new bitcoin.' },
             { term: 'CoinJoin', def: 'A collaborative transaction mixing multiple users\' inputs into equal-valued outputs to break tracking.' },
             { term: 'Common Input Ownership (CIOH)', def: 'Assumes all inputs in a single transaction belong to the same entity.' },
             { term: 'Consolidation', def: 'A transaction sweeping multiple small UTXOs into a single output, often during low fees.' },
+            { term: 'Data Storage', def: 'The practice of embedding arbitrary information, like text or images, directly into the blockchain using OP_RETURN or witness data.' },
             { term: 'Dust', def: 'An amount of satoshis that is smaller than the cost to spend it in miner fees.' },
+            { term: 'Exchange Withdrawals', def: 'Transactions where a cryptocurrency exchange sends funds out of its hot wallets to individual user addresses.' },
             { term: 'Fee Rate', def: 'Usually measured in satoshis per virtual byte (sat/vB), dictating priority in the mempool.' },
+            { term: 'Halving', def: 'An event occurring approximately every four years where the block reward given to miners is cut in half.' },
+            { term: 'Hash Rate', def: 'The total computational power being used to mine and process transactions on the network.' },
+            { term: 'HD Wallet', def: 'Hierarchical Deterministic wallet. A wallet that derives all its keys and addresses from a single master seed.' },
             { term: 'Heuristic', def: 'A probabilistic rule of thumb to infer real-world behavior from blockchain data.' },
+            { term: 'Lightning Network', def: 'A Layer 2 payment protocol operating on top of Bitcoin to enable fast, low-fee microtransactions.' },
             { term: 'Locktime (nLockTime)', def: 'A transaction or block level parameter enforcing that a transaction cannot be mined until a certain time or block height.' },
             { term: 'Mempool', def: 'The queue of unconfirmed transactions sitting in a node\'s memory waiting to be mined into a block.' },
+            { term: 'Mining', def: 'The process of performing computational work to secure the network, append blocks, and earn newly minted bitcoins.' },
+            { term: 'Mixers', def: 'Services or protocols (like CoinJoin) designed to obfuscate the history and ownership of cryptocurrency funds.' },
+            { term: 'Multisig', def: 'A script configuration requiring multiple private keys to authorize a transaction.' },
+            { term: 'Node', def: 'A computer participating in the Bitcoin network, validating and relaying transactions and blocks.' },
+            { term: 'OP_RETURN', def: 'A script opcode used to mark an output as provably unspendable, often used to embed arbitrary data.' },
             { term: 'Peel Chain', def: 'A series of transactions where a large amount is slowly "peeled" off into smaller payments across many steps.' },
+            { term: 'Peer-to-Peer', def: 'A decentralized network architecture where participants communicate directly with each other without a central server.' },
+            { term: 'Privacy', def: 'In Bitcoin, the ability to transact without revealing real-world identity or the entire history of one\'s funds.' },
+            { term: 'Private Key', def: 'A secret alphanumeric password/number used to spend bitcoins. Must be kept secure.' },
             { term: 'PSBT', def: 'Partially Signed Bitcoin Transaction. A standard format allowing multiple parties to construct and sign a transaction offline.' },
+            { term: 'Public Key', def: 'Derived from the private key, used to generate receiving addresses and verify signatures.' },
             { term: 'RBF (Replace-By-Fee)', def: 'A feature allowing a sender to bump the fee of an unconfirmed transaction by broadcasting a replacement.' },
+            { term: 'Round Number Exclusion', def: 'A heuristic determining change outputs by eliminating outputs that are exact round numbers.' },
             { term: 'Round Number Payment', def: 'A payment matching a specific human-readable round amount, like exactly 0.05 BTC.' },
+            { term: 'Satoshi (sat)', def: 'The smallest unit of Bitcoin. One hundred million satoshis equal one Bitcoin (1 BTC = 100,000,000 sats).' },
+            { term: 'Script Match', def: 'A heuristic for change detection that looks for outputs matching the input script type (e.g., P2WPKH to P2WPKH).' },
             { term: 'ScriptPubKey', def: 'The locking script placed on an output that defines the conditions to spend it (the "address").' },
             { term: 'SegWit', def: 'Segregated Witness. A protocol upgrade separating signature data from the transaction to block space.' },
             { term: 'Self Transfer', def: 'When a wallet spends a UTXO but sends the entire amount (minus fees) back to itself.' },
+            { term: 'SPV', def: 'Simplified Payment Verification. A method for lightweight clients to verify transactions without downloading the full blockchain.' },
             { term: 'Taproot', def: 'A recent upgrade allowing complex smart contracts to look exactly like standard single-signature transactions.' },
-            { term: 'UTXO', def: 'Unspent Transaction Output. The atomic piece of Bitcoin that can be spent.' }
+            { term: 'UTXO', def: 'Unspent Transaction Output. The atomic piece of Bitcoin that can be spent.' },
+            { term: 'UTXO Management', def: 'The practice of organizing and consolidating UTXOs in a wallet to optimize fees and privacy.' },
+            { term: 'UTXO Sweeping', def: 'The act of spending all available UTXOs from one or more addresses into a single new output.' },
+            { term: 'Wallet', def: 'Software or hardware that manages a user\'s private keys and interacts with the Bitcoin network.' },
+            { term: 'Wasabi', def: 'A popular privacy-focused Bitcoin wallet known for integrating CoinJoin natively.' },
+            { term: 'Whirlpool', def: 'A specific CoinJoin implementation, most famously used by the Samourai Wallet.' }
         ];
 
         glossaryContent.innerHTML = '';
@@ -280,8 +353,16 @@ document.addEventListener('DOMContentLoaded', () => {
                     body: formData
                 });
 
-                if (!res.ok) throw new Error('Upload failed');
-                const data = await res.json();
+                let data;
+                try {
+                    data = await res.json();
+                } catch (e) {
+                    throw new Error('Server returned invalid data');
+                }
+
+                if (!res.ok) {
+                    throw new Error(data.error || 'Upload failed');
+                }
 
                 uploadStatus.textContent = 'Success! Files analyzed.';
                 uploadStatus.style.color = 'var(--color-success)';
@@ -296,7 +377,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 setTimeout(() => importModal.style.display = 'none', 1500);
             } catch (err) {
                 console.error(err);
-                uploadStatus.textContent = 'Error processing files.';
+                uploadStatus.textContent = err.message || 'Error processing files.';
                 uploadStatus.style.color = 'var(--color-danger)';
                 btnUpload.disabled = false;
             }
@@ -525,11 +606,36 @@ document.addEventListener('DOMContentLoaded', () => {
         let byteHtml = '';
         if (block.analysis_summary && block.analysis_summary.size_stats) {
             const stats = block.analysis_summary.size_stats;
-            const witnessSize = stats.total_size - stats.base_size;
-            const basePct = stats.total_size > 0 ? (stats.base_size / stats.total_size * 100) : 0;
-            const witPct = stats.total_size > 0 ? (witnessSize / stats.total_size * 100) : 0;
+            const total = stats.total_size;
+            if (stats.version_size !== undefined) {
+                const verPct = total > 0 ? (stats.version_size / total * 100) : 0;
+                const inPct = total > 0 ? (stats.inputs_size / total * 100) : 0;
+                const outPct = total > 0 ? (stats.outputs_size / total * 100) : 0;
+                const witPct = total > 0 ? (stats.witness_size / total * 100) : 0;
+                const lockPct = total > 0 ? (stats.locktime_size / total * 100) : 0;
 
-            byteHtml = `
+                byteHtml = `
+            <div style="width: 100%; margin-top: 15px; text-align: left; grid-column: 1 / -1;">
+                <div style="margin-bottom: 5px;"><strong>BLOCK BYTE BREAKDOWN:</strong> <span class="muted" style="font-size: 0.85em; margin-left:10px;">Hover for details</span></div>
+                <div class="byte-bar tooltip-container" title="Version: ${stats.version_size} B | Inputs: ${stats.inputs_size} B | Outputs: ${stats.outputs_size} B | Witness: ${stats.witness_size} B | Locktime: ${stats.locktime_size} B">
+                    <div class="byte-version" style="width: ${verPct}%;"></div>
+                    <div class="byte-inputs" style="width: ${inPct}%;"></div>
+                    <div class="byte-outputs" style="width: ${outPct}%;"></div>
+                    <div class="byte-witness" style="width: ${witPct}%;"></div>
+                    <div class="byte-locktime" style="width: ${lockPct}%;"></div>
+                </div>
+                <div style="display:flex; justify-content:space-between; font-size: 0.85em; margin-top: 5px;" class="muted">
+                    <span><strong>Total:</strong> ${(stats.total_size / 1024 / 1024).toFixed(2)} MB / ${stats.total_size} B</span>
+                    <span><strong>Weight:</strong> ${stats.weight} WU</span>
+                    <span><strong>vBytes:</strong> ${stats.vbytes} vB</span>
+                </div>
+            </div>`;
+            } else {
+                const witnessSize = stats.total_size - stats.base_size;
+                const basePct = stats.total_size > 0 ? (stats.base_size / stats.total_size * 100) : 0;
+                const witPct = stats.total_size > 0 ? (witnessSize / stats.total_size * 100) : 0;
+
+                byteHtml = `
             <div style="width: 100%; margin-top: 15px; text-align: left; grid-column: 1 / -1;">
                 <div style="margin-bottom: 5px;"><strong>BLOCK BYTE BREAKDOWN:</strong> <span class="muted" style="font-size: 0.85em; margin-left:10px;">Hover for details</span></div>
                 <div class="byte-bar tooltip-container" title="Base: ${stats.base_size} B | Witness: ${witnessSize} B">
@@ -542,6 +648,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     <span><strong>vBytes:</strong> ${stats.vbytes} vB</span>
                 </div>
             </div>`;
+            }
         }
 
         headerInfo.innerHTML = `
@@ -573,8 +680,9 @@ document.addEventListener('DOMContentLoaded', () => {
         if (filterVal !== 'all') {
             if (filterVal === 'flagged') {
                 viewableTxs = viewableTxs.filter(t => Object.values(t.heuristics).some(h => h.detected));
-            } else if (filterVal === 'op_return') {
-                viewableTxs = viewableTxs.filter(t => t.heuristics.op_return && t.heuristics.op_return.detected);
+            } else if (filterVal.startsWith('h_')) {
+                const heuristicKey = filterVal.substring(2);
+                viewableTxs = viewableTxs.filter(t => t.heuristics[heuristicKey] && t.heuristics[heuristicKey].detected);
             } else {
                 viewableTxs = viewableTxs.filter(t => t.classification === filterVal);
             }

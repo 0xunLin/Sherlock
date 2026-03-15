@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sherlock: Manual</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        .manual-container {
+            max-width: 900px;
+            margin: 100px auto 50px auto;
+            padding: 20px;
+        }
+
+        .manual-section {
+            margin-bottom: 40px;
+            background: var(--bg-card);
+            padding: 40px;
+            border-radius: 12px;
+            border: 2px solid var(--border-color);
+            position: relative;
+        }
+
+        .mac-window-body h1 {
+            font-family: var(--font-mono);
+            font-size: 3rem;
+            margin-bottom: 10px;
+            color: var(--text-dark);
+        }
+
+        .mac-window-body h2 {
+            font-family: var(--font-mono);
+            font-size: 2rem;
+            margin-bottom: 20px;
+            color: var(--text-dark);
+        }
+
+        .mac-window-body h3 {
+            font-family: var(--font-serif);
+            font-size: 1.5rem;
+            margin-top: 30px;
+            margin-bottom: 15px;
+            color: var(--color-danger);
+            font-weight: bold;
+        }
+
+        .mac-window-body p,
+        .mac-window-body ul {
+            font-family: var(--font-serif);
+            font-size: 1.15rem;
+            line-height: 1.6;
+            color: var(--text-dark);
+            margin-bottom: 15px;
+        }
+
+        .mac-window-body li {
+            margin-bottom: 10px;
+            margin-left: 20px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="theme-toggle-container">
+        <button id="theme-toggle" class="theme-btn" title="Toggle Victorian Theme">VICTORIAN MODE</button>
+    </div>
+
+    <div class="fixed-nav">
+        <a href="index.html" class="nav-pill" title="Return to App">RETURN TO APP</a>
+        <a href="#" class="nav-pill active">SHERLOCK MANUAL</a>
+        <a href="https://github.com/SummerOfBitcoin/2026-developer-challenge-3-sherlock-0xunLin/blob/main/APPROACH.md"
+            target="_blank" class="nav-pill" title="Read the approach document">APPROACH</a>
+    </div>
+
+    <!-- Background grid -->
+    <div class="grid-background" style="position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; z-index: -1;">
+    </div>
+
+    <div class="manual-container">
+
+        <div class="mac-window"
+            style="width: 100%; max-width: 100%; margin-bottom: 50px; text-align: left; transform: none; position: relative; animation: none;">
+            <div class="mac-window-header">
+                <div class="mac-dots">
+                    <span class="dot red"></span>
+                    <span class="dot yellow"></span>
+                    <span class="dot green"></span>
+                </div>
+                <div class="window-title mono-text">MANUAL.MD</div>
+            </div>
+            <div class="mac-window-body" style="padding: 50px;">
+                <h1>Sherlock Manual</h1>
+                <p class="mono-text muted" style="font-family: var(--font-mono); font-size: 1rem;">A guide to
+                    probabilistic chain-analysis in Sherlock.</p>
+                <hr style="margin: 30px 0; border: none; border-top: 1px dashed var(--border-color);">
+
+                <h2>1. Getting Started</h2>
+                <p>Welcome to <strong>Sherlock</strong>, a local chain analysis engine. Sherlock is designed to parse
+                    raw Bitcoin Core block data, automatically identify behavioral patterns, and assign probabilistic
+                    tags and heuristic classifications to individual transactions.</p>
+
+                <h3>Importing Blocks</h3>
+                <p>To analyze a new block, locate the <strong><code>in</code> (Import New Block)</strong> button on the
+                    fixed left sidebar. You will need three files corresponding to the same block from a Bitcoin Core
+                    datadir:</p>
+                <ul>
+                    <li><code>blk*.dat</code> - The raw block binary data.</li>
+                    <li><code>rev*.dat</code> - The undo (reverse) data containing spent output information.</li>
+                    <li><code>xor.dat</code> - The XOR mask applied to the files by Bitcoin Core.</li>
+                </ul>
+                <p>Click the <code>in</code> button, select the three corresponding files from your local system when
+                    prompted, and click "ANALYZE FILES". The backend engine will parse the raw binary, link the inputs,
+                    run all heuristics, and automatically load the results into your dashboard.</p>
+
+                <h3>The Chain Data Browser (Dashboard)</h3>
+                <p>The primary view of the Sherlock web interface is the <strong>Chain Data Browser</strong>, located at
+                    the bottom of the main page.</p>
+                <ul>
+                    <li><strong>Selecting Data:</strong> Use the dropdown menu in the dashboard header to select a
+                        previously parsed and analyzed block file.</li>
+                    <li><strong>High-Level Stats:</strong> Once loaded, the top bar displays vital signs for the block:
+                        Total Transactions, Flagged Transactions, Average Fee rate, and total triggered Heuristics.</li>
+                    <li><strong>Block Breakdown:</strong> To the right, a dynamic pie chart visualizes the
+                        byte-allocation within the block, showing the ratio of standard transaction data vs. SegWit
+                        witness data vs. block header overhead.</li>
+                    <li><strong>Interacting with Transactions:</strong> The main list shows the most notable flagged
+                        transactions. You can click on any transaction row to open a detailed modal containing:
+                        <ul>
+                            <li>The transaction's unique hash (TXID).</li>
+                            <li>A summary of exactly which privacy heuristics were triggered and why.</li>
+                            <li>A breakdown of inputs (where the money came from) and outputs (where it went), including
+                                script types and values.</li>
+                        </ul>
+                    </li>
+                </ul>
+
+                <h3>Transaction Tracer</h3>
+                <ol>
+                    <li>Click the <strong><code>tt</code> (Transaction Tracer)</strong> button on the left sidebar.</li>
+                    <li>Paste a specific 64-character Transaction ID (TXID) into the text box.</li>
+                    <li>Click <strong>"TRACE"</strong>. If the transaction exists in your loaded block, Sherlock will
+                        immediately open its detailed breakdown.</li>
+                </ol>
+
+                <h3>Information Glossary</h3>
+                <ol>
+                    <li>Click the <strong><code>ig</code> (Information Glossary)</strong> button on the left sidebar.
+                    </li>
+                    <li>Scroll the list or use the search bar to find definitions for dense terminology like "UTXO",
+                        "CoinJoin", or "Address Reuse".</li>
+                    <li>Click 'X' to close the glossary when you're done studying.</li>
+                </ol>
+
+                <hr style="margin: 40px 0; border: none; border-top: 1px dashed var(--border-color);">
+
+                <h2>2. Analysis Heuristics</h2>
+                <p>Sherlock applies the following 9 heuristics to every transaction parsed. These behaviors help group
+                    addresses and track fund flows across the pseudonymous blockchain.</p>
+
+                <h3>Common Input Ownership (CIOH)</h3>
+                <ul>
+                    <li><strong>What it is:</strong> Multiple inputs consumed in a single transaction.</li>
+                    <li><strong>Why it matters:</strong> It implies all inputs are controlled by the same wallet, since
+                        signing them requires all corresponding private keys.</li>
+                </ul>
+
+                <h3>Change Detection</h3>
+                <ul>
+                    <li><strong>What it is:</strong> Identifying which output is the internal "change" returned to the
+                        sender.</li>
+                    <li><strong>How it works:</strong> Sherlock looks for outputs that match the input script type, or
+                        eliminates outputs that look like human-entered round numbers (e.g. 0.05 BTC).</li>
+                </ul>
+
+                <h3>Consolidation</h3>
+                <ul>
+                    <li><strong>What it is:</strong> Combining many UTXOs into one or two outputs.</li>
+                    <li><strong>Why it matters:</strong> Wallets do this automatically for housekeeping. It strongly
+                        signals that all inputs belong to the same entity.</li>
+                </ul>
+
+                <h3>Address Reuse</h3>
+                <ul>
+                    <li><strong>What it is:</strong> The exact same address appears in both inputs and outputs.</li>
+                    <li><strong>Why it matters:</strong> It deterministically links multiple UTXOs to the same public
+                        key, destroying privacy.</li>
+                </ul>
+
+                <h3>Round Number Payments</h3>
+                <ul>
+                    <li><strong>What it is:</strong> Outputs with exact, round values (e.g. 0.01 BTC).</li>
+                    <li><strong>Why it matters:</strong> Humans type round numbers to pay people. Non-round numbers are
+                        usually auto-generated change.</li>
+                </ul>
+
+                <h3>CoinJoin</h3>
+                <ul>
+                    <li><strong>What it is:</strong> Users combine inputs to create many identical equal-value outputs.
+                    </li>
+                    <li><strong>Why it matters:</strong> It breaks the CIOH assumption deliberately to mix funds and
+                        preserve privacy.</li>
+                </ul>
+
+                <h3>OP_RETURN Data</h3>
+                <ul>
+                    <li><strong>What it is:</strong> Provably unspendable outputs containing arbitrary hex data.</li>
+                    <li><strong>Why it matters:</strong> Indicates a timestamp, notarization, or secondary layer
+                        protocol rather than a financial transfer.</li>
+                </ul>
+
+                <h3>Self-Transfer</h3>
+                <ul>
+                    <li><strong>What it is:</strong> All inputs and outputs share the exact same script type with no
+                        obvious payment.</li>
+                    <li><strong>Why it matters:</strong> Usually a user just moving their own funds around for security
+                        or privacy rotation.</li>
+                </ul>
+
+                <h3>Peeling Chain</h3>
+                <ul>
+                    <li><strong>What it is:</strong> A large balance is spent into a small payment and a large change
+                        output, repeatedly over time.</li>
+                    <li><strong>Why it matters:</strong> Often reveals an exchange withdrawal system or an entity slowly
+                        distributing funds.</li>
+                </ul>
+
+            </div>
+        </div>
+    </div>
+
+    <!-- Minimal script to support theme toggle -->
+    <script>
+        const themeBtn = document.getElementById('theme-toggle');
+        const isVictorian = localStorage.getItem('victorianTheme') === 'true';
+        if (isVictorian) {
+            document.body.classList.add('victorian-theme');
+            themeBtn.textContent = 'MODERN MODE';
+        }
+
+        themeBtn.addEventListener('click', () => {
+            const currentIsVictorian = document.body.classList.contains('victorian-theme');
+            if (currentIsVictorian) {
+                document.body.classList.remove('victorian-theme');
+                themeBtn.textContent = 'VICTORIAN MODE';
+                localStorage.setItem('victorianTheme', 'false');
+            } else {
+                document.body.classList.add('victorian-theme');
+                themeBtn.textContent = 'MODERN MODE';
+                localStorage.setItem('victorianTheme', 'true');
+            }
+        });
+    </script>
+</body>
+
+</html>

@@ -38,9 +38,12 @@ Two methods are applied in priority order:
 
 2. **Round-number exclusion (`round_number_exclusion`, confidence `medium`):** For 2-output transactions where exactly one output has a "round" value (divisible by 10 000 sats ≈ 0.0001 BTC), the non-round output is likely change. Humans tend to send round amounts; wallets return whatever dust remains.
 
+3. **Larger-output fallback (`larger_output`, confidence `low`):** If a 2-output transaction hasn't been matched by the above methods, and the output values are unequal, we assume the larger output is the change. This relies on the real-world behaviour where people usually spend less than their whole UTXO balance.
+
 **Confidence model:**
 - `high` when script-type matching uniquely identifies one output.
-- `medium` when only round-number analysis is available (less reliable — some payments are also non-round amounts).
+- `medium` when round-number analysis is used.
+- `low` for the larger-output fallback, as this makes a broad assumption.
 
 **Limitations:**
 - **Same-type outputs:** When both outputs share the input script type, this heuristic cannot distinguish change from payment by script type alone.
@@ -179,6 +182,29 @@ As a secondary signal, the simpler case of 1-input, 1-output with address reuse 
 
 ---
 
+### 9. Peeling Chain Step Detection
+
+**What it detects:**
+Peeling chains occur when an entity makes a series of payments by repeatedly taking a large UTXO, sending a small amount to a destination, and sending the potentially large change to a new address they control. Identifying a peeling step helps analysts follow a single actor's funds across multiple transactions. It's a structure commonly seen in mixing services or automated exchange withdrawals.
+
+**How it is detected/computed:**
+Since we cannot confidently link inter-block chains synchronously in a single pass without indexing, we identify *individual steps* that fit the peeling chain criteria:
+1. Not a coinbase transaction.
+2. `vins.length === 1` and `vouts.length === 2`.
+3. One output is significantly larger than the other (specifically, the maximum output value is ≥ 5x the minimum output value).
+
+We report the larger output as the likely change index.
+
+**Confidence model:**
+- `high` if the larger output's script type matches the single input's script type.
+- `medium` otherwise, as the 5:1 ratio threshold is heuristic and may flag standard unbalanced payments.
+
+**Limitations:**
+- **Local Scope:** We only flag the transaction *shape* as a potential peel step; we do not recursively trace the change address through subsequent blocks.
+- **Normal user payments:** An ordinary payment from a wealthy wallet to a low-value service naturally creates this 1-in-2-out unbalanced shape.
+
+---
+
 ## Architecture Overview
 
 ```
@@ -192,7 +218,7 @@ blk*.dat + rev*.dat + xor.dat
          │ blocks[]
          ▼
   ┌─────────────┐
-  │ analyzer.js  │  ← Applies 8 heuristics per tx,
+  │ analyzer.js  │  ← Applies 9 heuristics per tx,
   │              │     classifies tx, computes stats
   └──────┬──────┘
          │ result { fileStats, blocks[] }
@@ -218,9 +244,10 @@ blk*.dat + rev*.dat + xor.dat
 
 **Data flow:**
 1. `parser.js` reads raw binary `.dat` files, applies XOR decoding, and extracts block headers, transactions, inputs (with prevout data from the undo file), and outputs.
-2. `analyzer.js` iterates every transaction, applies all 8 heuristics, classifies the transaction, and aggregates per-block and file-level statistics.
+2. `analyzer.js` iterates every transaction, applies all 9 heuristics, classifies the transaction, and aggregates per-block and file-level statistics.
 3. `cli.js` streams the JSON output to avoid memory issues on large block files and generates the Markdown report.
-4. `server.js` serves the web visualizer and provides an API endpoint (`/api/analyze`) that runs the parser + analyzer on uploaded files.
+4. `server.js` serves the web visualizer and provides an API endpoint (`/api/upload`) that executes the CLI engine via child process, captures precise `stderr` traces for file validation, and returns structured data to the client.
+5. The frontend (`app.js`) dynamically renders interactive dashboards, complete with heuristic dictionaries, a searchable Information Glossary, and detailed block byte breakdowns.
 
 ---
 
@@ -239,6 +266,11 @@ blk*.dat + rev*.dat + xor.dat
 
 ### Script-Type Based Analysis
 - We rely heavily on script types (p2pkh, p2wpkh, p2tr, etc.) extracted from the raw scriptPubKey. This avoids the need for a full address derivation library while still enabling powerful heuristics like change detection and consolidation analysis.
+
+### UI/UX and Thematic Design
+- **Dual-Theme System:** The visualizer incorporates a toggleable styling system ("Modern" vs. "Victorian" modes). The Victorian theme utilizes bespoke serif typography and high-contrast color palettes to evoke a classic detective aesthetic, while the Modern theme focuses on clean, data-dense layouts.
+- **Interactive Education:** Rather than just displaying raw data, the frontend includes a "Heuristics Dictionary" carousel and an "Information Glossary". This educates users on complex chain-analysis concepts directly within the app, lowering the barrier to entry.
+- **Robust Feedback:** The file upload mechanism pipes raw JSON error outputs from the trailing CLI process directly into the frontend UI, providing users with exact failure reasons (e.g., "Mismatched block heights") instead of generic errors.
 
 ---
 

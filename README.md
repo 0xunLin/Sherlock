@@ -7,6 +7,9 @@ This challenge builds on the transaction parser (Challenge 1) and PSBT builder (
 
 This challenge is deliberately open-ended on heuristics. There is no single "right answer" — the quality of your analysis, the rigor of your approach, and the clarity of your documentation are what matter.
 
+> [!NOTE]
+> 📖 For a step-by-step guide on installing and using Sherlock on your local machine, see the **[Sherlock Manual](Sherlock_manual.md)**.
+
 ---
 
 ## Assumptions / scope

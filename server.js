@@ -58,7 +58,16 @@ app.post('/api/upload', upload.fields([
             if (error) {
                 console.error(`Execution error: ${error.message}`);
                 console.error(`stderr: ${stderr}`);
-                return res.status(500).json({ error: 'Failed to process block files' });
+                let msg = 'Failed to process block files';
+                try {
+                    const parsed = JSON.parse(stderr.trim());
+                    if (parsed && parsed.error && parsed.error.message) {
+                        msg = parsed.error.message;
+                    }
+                } catch(e) {
+                    if (stderr && stderr.trim()) msg = stderr.trim();
+                }
+                return res.status(500).json({ error: msg });
             }
 
             res.json({ ok: true, stem: stem });
@@ -105,6 +114,10 @@ app.get('/api/blocks/:stem', (req, res) => {
 });
 
 const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => {
-    console.log(`Web visualizer running at http://127.0.0.1:${PORT}`);
-});
+if (require.main === module) {
+    app.listen(PORT, () => {
+        console.log(`Web visualizer running at http://127.0.0.1:${PORT}`);
+    });
+}
+
+module.exports = app;

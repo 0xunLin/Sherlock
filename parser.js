@@ -344,5 +344,16 @@ function parseBlocksWithUndo(blkFile, revFile, xorFile) {
 }
 
 module.exports = {
-    parseBlocksWithUndo
+    parseBlocksWithUndo,
+    ByteStreamReader,
+    xorDecode,
+    classifyScript,
+    writeVarInt,
+    computeTxMeta,
+    readTx,
+    getBip34Height,
+    readB128VarInt,
+    decompressAmount,
+    parseCompressedTxOut,
+    parseUndoRecord
 };

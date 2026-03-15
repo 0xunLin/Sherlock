@@ -351,6 +351,36 @@ a {
     color: #444;
 }
 
+/* Specific overrides for exceptionally long definitions that overflow */
+#dict-content.compact-card h1 {
+    font-size: 3.2rem;
+    line-height: 1.1;
+    margin-bottom: 5px;
+}
+
+#dict-content.compact-card .pronunciation {
+    font-size: 1rem;
+    margin-bottom: 10px;
+}
+
+#dict-content.compact-card hr {
+    margin-bottom: 10px;
+}
+
+#dict-content.compact-card .definition {
+    font-size: 1.1rem;
+    margin-bottom: 10px;
+}
+
+#dict-content.compact-card .see-also {
+    font-size: 1rem;
+    margin-bottom: 15px;
+}
+
+#dict-content.compact-card .variation {
+    font-size: 0.95rem;
+}
+
 .dict-nav-btn {
     width: 60px;
     height: 60px;
@@ -1210,6 +1240,42 @@ body.victorian-theme .tx-table th {
     background: var(--bg-light);
     color: var(--text-dark);
     border-bottom: 2px solid var(--border-strong);
+}
+
+/* Victorian Badge Overrides — unified sepia/parchment palette */
+body.victorian-theme .badge {
+    border: 1px solid #8a7356;
+    font-family: var(--font-serif);
+}
+
+body.victorian-theme .badge.simple_payment {
+    background: #3a3122;
+    color: #c8b88a;
+}
+
+body.victorian-theme .badge.consolidation {
+    background: #33291e;
+    color: #d4af37;
+}
+
+body.victorian-theme .badge.self_transfer {
+    background: #2e2820;
+    color: #bfa87a;
+}
+
+body.victorian-theme .badge.coinjoin {
+    background: #3a2e1e;
+    color: #e6c76e;
+}
+
+body.victorian-theme .badge.batch_payment {
+    background: #352a20;
+    color: #c8a86e;
+}
+
+body.victorian-theme .badge.unknown {
+    background: #2a2319;
+    color: #8a7356;
 }
 
 /* Byte Breakdown Bars */

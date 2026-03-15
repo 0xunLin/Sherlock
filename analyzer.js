@@ -4,7 +4,7 @@ function analyzeBlocks(blocks) {
         flagged_transactions: 0,
         script_type_distribution: {},
         fee_rates: [],
-        size_stats: { total_size: 0, base_size: 0, weight: 0, vbytes: 0 }
+        size_stats: { total_size: 0, base_size: 0, weight: 0, vbytes: 0, version_size: 0, inputs_size: 0, outputs_size: 0, witness_size: 0, locktime_size: 0 }
     };
 
     const blockResults = [];
@@ -12,11 +12,11 @@ function analyzeBlocks(blocks) {
     for (const block of blocks) {
         const blockSummary = {
             total_transactions_analyzed: block.txCount,
-            heuristics_applied: ["cioh", "change_detection", "consolidation", "address_reuse", "round_number_payment", "coinjoin", "op_return", "self_transfer"],
+            heuristics_applied: ["cioh", "change_detection", "consolidation", "address_reuse", "round_number_payment", "coinjoin", "op_return", "self_transfer", "peeling_chain"],
             flagged_transactions: 0,
             script_type_distribution: {},
             fee_rates: [],
-            size_stats: { total_size: 0, base_size: 0, weight: 0, vbytes: 0 }
+            size_stats: { total_size: 0, base_size: 0, weight: 0, vbytes: 0, version_size: 0, inputs_size: 0, outputs_size: 0, witness_size: 0, locktime_size: 0 }
         };
 
         const transactions = [];
@@ -28,11 +28,21 @@ function analyzeBlocks(blocks) {
             blockSummary.size_stats.base_size += tx.baseSize;
             blockSummary.size_stats.weight += tx.weight;
             blockSummary.size_stats.vbytes += tx.vbytes;
+            blockSummary.size_stats.version_size += tx.version_size;
+            blockSummary.size_stats.inputs_size += tx.inputs_size;
+            blockSummary.size_stats.outputs_size += tx.outputs_size;
+            blockSummary.size_stats.witness_size += tx.witness_size;
+            blockSummary.size_stats.locktime_size += tx.locktime_size;
 
             fileStats.size_stats.total_size += tx.totalSize;
             fileStats.size_stats.base_size += tx.baseSize;
             fileStats.size_stats.weight += tx.weight;
             fileStats.size_stats.vbytes += tx.vbytes;
+            fileStats.size_stats.version_size += tx.version_size;
+            fileStats.size_stats.inputs_size += tx.inputs_size;
+            fileStats.size_stats.outputs_size += tx.outputs_size;
+            fileStats.size_stats.witness_size += tx.witness_size;
+            fileStats.size_stats.locktime_size += tx.locktime_size;
 
             // Record script distribution
             for (const vout of tx.vouts) {
@@ -104,6 +114,15 @@ function analyzeBlocks(blocks) {
                         };
                         changeDetected = true;
                     }
+                }
+                if (!changeDetected && tx.vouts.length === 2 && tx.vouts[0].value !== tx.vouts[1].value) {
+                    changeInfo = {
+                        detected: true,
+                        likely_change_index: tx.vouts[0].value > tx.vouts[1].value ? 0 : 1,
+                        method: "larger_output",
+                        confidence: "low"
+                    };
+                    changeDetected = true;
                 }
             }
             heuristics.change_detection = changeInfo;
@@ -231,6 +250,29 @@ function analyzeBlocks(blocks) {
             heuristics.self_transfer = selfTransferInfo;
             if (selfTransferDetected) isFlagged = true;
 
+            // 9. peeling_chain
+            let peelingChainDetected = false;
+            let peelingChainInfo = { detected: false };
+            if (!tx.isCoinbase && tx.vins.length === 1 && tx.vouts.length === 2 && tx.vins[0].prevout) {
+                const inType = tx.vins[0].prevout.scriptType;
+                const v0 = tx.vouts[0].value;
+                const v1 = tx.vouts[1].value;
+                const maxV = Math.max(v0, v1);
+                const minV = Math.min(v0, v1);
+                if (minV > 0 && maxV >= 5 * minV) {
+                    peelingChainDetected = true;
+                    const largerIdx = v0 > v1 ? 0 : 1;
+                    const matchesType = tx.vouts[largerIdx].scriptType === inType;
+                    peelingChainInfo = {
+                        detected: true,
+                        confidence: matchesType ? 'high' : 'medium',
+                        likely_change_index: largerIdx
+                    };
+                }
+            }
+            heuristics.peeling_chain = peelingChainInfo;
+            if (peelingChainDetected) isFlagged = true;
+
             if (isFlagged) {
                 fileStats.flagged_transactions++;
                 blockSummary.flagged_transactions++;
@@ -243,6 +285,8 @@ function analyzeBlocks(blocks) {
             } else if (!tx.isCoinbase) {
                 if (coinjoinDetected) {
                     classification = "coinjoin";
+                } else if (tx.vouts.length >= 3 && tx.vins.length === 1) {
+                    classification = "batch_payment";
                 } else if (selfTransferDetected) {
                     classification = "self_transfer";
                 } else if (tx.vouts.length >= 3) {
@@ -310,7 +354,7 @@ function analyzeBlocks(blocks) {
     const { fee_rates, ...restStats } = fileStats;
     const finalFileStats = {
         ...restStats,
-        heuristics_applied: ["cioh", "change_detection", "consolidation", "address_reuse", "round_number_payment", "coinjoin", "op_return", "self_transfer"],
+        heuristics_applied: ["cioh", "change_detection", "consolidation", "address_reuse", "round_number_payment", "coinjoin", "op_return", "self_transfer", "peeling_chain"],
         fee_rate_stats: computeStats(fee_rates)
     };
 
