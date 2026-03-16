@@ -673,6 +673,7 @@ a {
     box-shadow: var(--shadow-lg);
     z-index: 10;
     overflow: hidden;
+    min-width: 0;
 }
 
 .dash-header-bar {
@@ -758,6 +759,42 @@ a {
     font-weight: bold;
 }
 
+.copyable-hash {
+    cursor: pointer;
+    font-family: var(--font-mono);
+    font-size: 0.9rem;
+    position: relative;
+    transition: var(--transition);
+    display: inline-block;
+}
+
+.copyable-hash:hover {
+    color: var(--color-info);
+}
+
+.copy-badge {
+    font-size: 0.65rem;
+    background: var(--color-info);
+    color: white;
+    padding: 2px 6px;
+    border-radius: 4px;
+    margin-left: 5px;
+    vertical-align: middle;
+    text-transform: uppercase;
+    font-weight: bold;
+    opacity: 0.7;
+    transition: var(--transition);
+}
+
+.copy-badge.copied {
+    background: var(--color-success);
+    opacity: 1;
+}
+
+.copyable-hash:hover .copy-badge {
+    opacity: 1;
+}
+
 .stat-val.warning {
     color: var(--color-warning);
 }
@@ -770,6 +807,12 @@ a {
 .dash-tabs {
     display: flex;
     gap: 20px;
+    overflow-x: auto;
+    white-space: nowrap;
+    scrollbar-width: thin;
+    -ms-overflow-style: auto;
+    -webkit-overflow-scrolling: touch;
+    padding-bottom: 5px;
 }
 
 .dash-tab {
@@ -801,11 +844,16 @@ a {
 .block-header-info {
     display: flex;
     gap: 30px;
+    flex-wrap: wrap;
     margin-bottom: 20px;
     font-family: var(--font-mono);
     font-size: 0.9rem;
     padding-bottom: 15px;
     border-bottom: 1px dashed var(--border-strong);
+}
+
+.block-header-info>div {
+    min-width: 120px;
 }
 
 .tx-table {
@@ -1278,6 +1326,27 @@ body.victorian-theme .badge.unknown {
     color: #8a7356;
 }
 
+body.victorian-theme .copyable-hash:hover {
+    color: #ffd700;
+}
+
+body.victorian-theme .copy-badge {
+    background: #3e3028;
+    color: #d4af37;
+    border: 1px solid #d4af37;
+    border-radius: 2px;
+    opacity: 1;
+    font-family: var(--font-serif);
+    font-style: italic;
+    font-weight: 500;
+}
+
+body.victorian-theme .copy-badge.copied {
+    background: #d4af37;
+    color: #2e241e;
+    border-color: #ffd700;
+}
+
 /* Byte Breakdown Bars */
 .byte-bar {
     width: 100%;
@@ -1387,4 +1456,198 @@ body.victorian-theme .tx-graph-arrow svg {
     filter: drop-shadow(1px 2px 2px rgba(0, 0, 0, 0.5));
 }
 
-/* Bright Victorian Teal/Slate */
+/* --- Responsive Design Media Queries --- */
+
+/* Tablets & Small Desktops (under 1024px) */
+@media screen and (max-width: 1024px) {
+    .fixed-nav {
+        top: auto;
+        bottom: 20px;
+        right: 50%;
+        transform: translateX(50%);
+        background: rgba(255, 255, 255, 0.95);
+        padding: 8px 16px;
+        border: 1px solid var(--border-light);
+        border-radius: 50px;
+        box-shadow: var(--shadow-lg);
+        backdrop-filter: blur(10px);
+        width: max-content;
+        max-width: 95%;
+        flex-wrap: wrap;
+        justify-content: center;
+    }
+
+    .theme-toggle-container {
+        top: 15px;
+    }
+
+    .fixed-socials {
+        left: 50%;
+        transform: translateX(-50%);
+        top: 20px;
+        bottom: auto;
+        flex-direction: row;
+        gap: 8px;
+        background: rgba(255, 255, 255, 0.95);
+        padding: 5px 12px;
+        border-radius: 40px;
+        border: 1px solid var(--border-light);
+        box-shadow: var(--shadow-sm);
+        backdrop-filter: blur(10px);
+    }
+
+    .fixed-socials .icon {
+        width: 32px;
+        height: 32px;
+        font-size: 0.8rem;
+    }
+
+    .dictionary-card {
+        padding: 30px;
+        height: auto;
+        min-height: 400px;
+    }
+
+    .dictionary-card h1 {
+        font-size: 3rem;
+    }
+
+    .dash-stats {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .phone-2,
+    .phone-3 {
+        transform: none;
+    }
+
+    body.victorian-theme .fixed-nav,
+    body.victorian-theme .fixed-socials {
+        background: rgba(46, 36, 30, 0.9) !important;
+        border: 1px solid #d4af37;
+    }
+
+    /* Reposition Tooltips for horizontal layout */
+    .tooltip-container:hover::after {
+        left: 50%;
+        top: auto;
+        bottom: 150%;
+        transform: translateX(-50%);
+    }
+}
+
+/* Mobile Devices (under 768px) */
+@media screen and (max-width: 768px) {
+    .slide {
+        padding: 60px 15px;
+    }
+
+    .background-text {
+        font-size: 25vw;
+    }
+
+    .dictionary-container {
+        flex-direction: column;
+    }
+
+    .dict-nav-btn {
+        width: 50px;
+        height: 50px;
+        font-size: 1.5rem;
+    }
+
+    .dictionary-card h1 {
+        font-size: 2.2rem;
+    }
+
+    .dictionary-card .definition {
+        font-size: 1rem;
+    }
+
+    .dash-stats {
+        grid-template-columns: 1fr;
+        gap: 10px;
+    }
+
+    .dash-header-content {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 10px;
+    }
+
+    .dash-blocks-view {
+        padding: 15px;
+        overflow-x: auto;
+        width: 100%;
+        min-width: 0;
+        -webkit-overflow-scrolling: touch;
+        scrollbar-width: thin;
+    }
+
+    .tx-table {
+        min-width: 700px;
+    }
+
+    .mac-window-body {
+        padding: 20px;
+    }
+
+    .phone-mockup {
+        width: 100%;
+        max-width: 280px;
+        height: auto;
+        min-height: 450px;
+    }
+
+    .fixed-nav {
+        padding: 6px 12px;
+        bottom: 15px;
+    }
+
+    .nav-pill {
+        padding: 4px 10px;
+        font-size: 0.7rem;
+    }
+
+    .fixed-socials {
+        bottom: 75px;
+        top: auto;
+    }
+}
+
+@media screen and (max-width: 480px) {
+    .background-text {
+        font-size: 30vw;
+    }
+
+    .dictionary-card h1 {
+        font-size: 1.8rem;
+    }
+
+    .fixed-nav {
+        bottom: 10px;
+    }
+
+    .fixed-socials {
+        bottom: 65px;
+    }
+}
+
+/* Victorian Theme Accents */
+body.victorian-theme .fixed-nav,
+body.victorian-theme .fixed-socials {
+    border-radius: 40px;
+}
+
+body.victorian-theme .nav-pill.active,
+body.victorian-theme .nav-pill:first-child {
+    background: #4a3b33;
+    color: #ffd700;
+    border: 1px solid #d4af37;
+}
+
+body.victorian-theme .icon {
+    background: #2e241e;
+    color: #f0ebd8;
+    border: none;
+}

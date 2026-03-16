@@ -166,12 +166,12 @@ document.addEventListener('DOMContentLoaded', () => {
     const glossaryContent = document.getElementById('glossary-content');
     const glossarySearch = document.getElementById('glossary-search');
 
-    const btnTracer = document.getElementById('btn-tracer');
-    const tracerModal = document.getElementById('tracer-modal');
-    const closeTracer = document.getElementById('close-tracer-modal');
-    const tracerInput = document.getElementById('tracer-input');
+    const btnTracker = document.getElementById('btn-tracker');
+    const trackerModal = document.getElementById('tracker-modal');
+    const closeTracker = document.getElementById('close-tracker-modal');
+    const trackerInput = document.getElementById('tracker-input');
     const btnTrace = document.getElementById('btn-trace');
-    const tracerStatus = document.getElementById('tracer-status');
+    const trackerStatus = document.getElementById('tracker-status');
 
     const btnImport = document.getElementById('btn-import');
     const importModal = document.getElementById('import-modal');
@@ -259,26 +259,26 @@ document.addEventListener('DOMContentLoaded', () => {
         glossaryModal.addEventListener('click', (e) => { if (e.target === glossaryModal) glossaryModal.style.display = 'none'; });
     }
 
-    // 2. Tracer Logic
-    if (btnTracer) {
-        btnTracer.addEventListener('click', () => {
-            tracerModal.style.display = 'flex';
-            tracerInput.value = '';
-            tracerStatus.textContent = '';
+    // 2. Tracker Logic
+    if (btnTracker) {
+        btnTracker.addEventListener('click', () => {
+            trackerModal.style.display = 'flex';
+            trackerInput.value = '';
+            trackerStatus.textContent = '';
         });
-        closeTracer.addEventListener('click', () => tracerModal.style.display = 'none');
-        tracerModal.addEventListener('click', (e) => { if (e.target === tracerModal) tracerModal.style.display = 'none'; });
+        closeTracker.addEventListener('click', () => trackerModal.style.display = 'none');
+        trackerModal.addEventListener('click', (e) => { if (e.target === trackerModal) trackerModal.style.display = 'none'; });
 
         btnTrace.addEventListener('click', () => {
-            const txid = tracerInput.value.trim();
+            const txid = trackerInput.value.trim();
             if (txid.length !== 64) {
-                tracerStatus.textContent = '* Invalid length for a TXID.';
-                tracerStatus.style.color = 'var(--color-danger)';
+                trackerStatus.textContent = '* Invalid length for a TXID.';
+                trackerStatus.style.color = 'var(--color-danger)';
                 return;
             }
             if (!currentData || !currentData.blocks) {
-                tracerStatus.textContent = '* No parsed block data loaded.';
-                tracerStatus.style.color = 'var(--color-warning)';
+                trackerStatus.textContent = '* No parsed block data loaded.';
+                trackerStatus.style.color = 'var(--color-warning)';
                 return;
             }
 
@@ -289,11 +289,11 @@ document.addEventListener('DOMContentLoaded', () => {
             }
 
             if (foundTx) {
-                tracerModal.style.display = 'none';
                 showTxModal(foundTx);
+                trackerModal.style.display = 'none';
             } else {
-                tracerStatus.textContent = '* TXID not found in loaded blocks.';
-                tracerStatus.style.color = 'var(--color-danger)';
+                trackerStatus.textContent = '* TXID not found in loaded blocks.';
+                trackerStatus.style.color = 'var(--color-danger)';
             }
         });
     }
@@ -435,6 +435,30 @@ document.addEventListener('DOMContentLoaded', () => {
 
     fetchBlocks();
 
+    const handleCopyClick = (e) => {
+        const copyElement = e.target.closest('.copyable-hash');
+        if (copyElement) {
+            const hash = copyElement.getAttribute('data-hash');
+            navigator.clipboard.writeText(hash).then(() => {
+                const badge = copyElement.querySelector('.copy-badge');
+                if (badge) {
+                    const originalText = badge.textContent;
+                    badge.textContent = 'Copied!';
+                    badge.classList.add('copied');
+                    setTimeout(() => {
+                        badge.textContent = originalText;
+                        badge.classList.remove('copied');
+                    }, 2000);
+                }
+            });
+        }
+    };
+
+    // Global copy handler for block hashes
+    if (blocksContainer) {
+        blocksContainer.addEventListener('click', handleCopyClick);
+    }
+
     fileSelector.addEventListener('change', (e) => {
         const stem = e.target.value;
         if (stem) {
@@ -468,6 +492,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
     txModal.addEventListener('click', (e) => {
         if (e.target === txModal) txModal.style.display = 'none';
+        handleCopyClick(e);
     });
 
     closeBlocksModal.addEventListener('click', () => {
@@ -522,16 +547,18 @@ document.addEventListener('DOMContentLoaded', () => {
         dbContent.style.display = 'block';
 
         const summary = data.analysis_summary;
+        const flaggedPct = summary.total_transactions_analyzed > 0 ? (summary.flagged_transactions / summary.total_transactions_analyzed * 100).toFixed(1) : 0;
         document.getElementById('stat-total').textContent = summary.total_transactions_analyzed.toLocaleString();
-        document.getElementById('stat-flagged').textContent = summary.flagged_transactions.toLocaleString();
+        document.getElementById('stat-flagged').textContent = `${summary.flagged_transactions.toLocaleString()} (${flaggedPct}%)`;
         document.getElementById('stat-fee').textContent = summary.fee_rate_stats.mean_sat_vb.toFixed(1);
         document.getElementById('stat-heuristics').textContent = summary.heuristics_applied.length;
 
         blockNavList.innerHTML = '';
         blocksContainer.innerHTML = '';
 
+        const maxVisible = window.innerWidth < 768 ? 4 : 10;
         data.blocks.forEach((block, idx) => {
-            if (idx < 10) {
+            if (idx < maxVisible) {
                 // Tab
                 const tab = document.createElement('div');
                 tab.className = 'dash-tab' + (idx === 0 ? ' active' : '');
@@ -551,7 +578,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if (idx === 0) renderBlockView(block);
         });
 
-        if (data.blocks.length > 10) {
+        if (data.blocks.length > maxVisible) {
             const moreBtn = document.createElement('div');
             moreBtn.className = 'dash-tab';
             moreBtn.id = 'more-blocks-tab';
@@ -651,10 +678,11 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         }
 
+        const blockPct = block.tx_count > 0 ? (block.analysis_summary.flagged_transactions / block.tx_count * 100).toFixed(1) : 0;
         headerInfo.innerHTML = `
-            <div><strong>HASH:</strong> ${block.block_hash.substring(0, 16)}...</div>
-            <div><strong>TXS:</strong> ${block.tx_count}</div>
-            <div><strong>FLAGGED:</strong> ${block.analysis_summary.flagged_transactions}</div>
+            <div class="copyable-hash" data-hash="${block.block_hash}" title="Click to copy full hash"><strong>HASH:</strong><br>${block.block_hash.substring(0, 16)}... <span class="copy-badge">copy</span></div>
+            <div><strong>TXS:</strong><br>${block.tx_count}</div>
+            <div><strong>FLAGGED:</strong><br>${block.analysis_summary.flagged_transactions} (${blockPct}%)</div>
             ${byteHtml}
         `;
         blocksContainer.appendChild(headerInfo);
@@ -795,7 +823,7 @@ document.addEventListener('DOMContentLoaded', () => {
             <div class="tx-graph-container">
                 <div class="tx-graph-column tx-inputs-col">
                     <div class="tx-graph-header">Inputs (${tx.inputs.length})</div>
-                    ${tx.inputs.slice(0, 50).map(i => `<div class="tx-node in-node" title="Value: ${i.value} sat"><span class="badge ${i.scriptType}">${i.scriptType}</span><div class="node-val">${(i.value / 100000000).toFixed(4)} BTC</div></div>`).join('')}
+                    ${tx.inputs.slice(0, 50).map(i => `<div class="tx-node in-node" title="Value: ${i.value} sat"><span class="badge ${i.scriptType}">${i.scriptType}</span><div class="node-val">${formatSats(i.value)}</div></div>`).join('')}
                     ${tx.inputs.length > 50 ? `<div class="tx-node in-node"><span class="badge unknown">...and ${tx.inputs.length - 50} more</span></div>` : ''}
                 </div>
                 <div class="tx-graph-arrow">
@@ -806,7 +834,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 </div>
                 <div class="tx-graph-column tx-outputs-col">
                     <div class="tx-graph-header">Outputs (${tx.outputs.length})</div>
-                    ${tx.outputs.slice(0, 50).map(o => `<div class="tx-node out-node" title="Value: ${o.value} sat"><span class="badge ${o.scriptType}">${o.scriptType}</span><div class="node-val">${(o.value / 100000000).toFixed(4)} BTC</div></div>`).join('')}
+                    ${tx.outputs.slice(0, 50).map(o => `<div class="tx-node out-node" title="Value: ${o.value} sat"><span class="badge ${o.scriptType}">${o.scriptType}</span><div class="node-val">${formatSats(o.value)}</div></div>`).join('')}
                     ${tx.outputs.length > 50 ? `<div class="tx-node out-node"><span class="badge unknown">...and ${tx.outputs.length - 50} more</span></div>` : ''}
                 </div>
             </div>
@@ -816,11 +844,20 @@ document.addEventListener('DOMContentLoaded', () => {
         let detailsHtml = `
             <div class="detail-row">
                 <div class="detail-lbl">TXID</div>
-                <div class="detail-val"><strong><a href="https://mempool.space/tx/${tx.txid}" target="_blank" style="color:var(--color-primary);">${tx.txid}</a></strong></div>
+                <div class="detail-val">
+                    <strong><a href="https://mempool.space/tx/${tx.txid}" target="_blank" style="color:var(--color-primary);">${tx.txid}</a></strong>
+                    <span class="copyable-hash" data-hash="${tx.txid}" title="Click to copy TXID" style="margin-left: 10px;">
+                        <span class="copy-badge">copy</span>
+                    </span>
+                </div>
             </div>
             <div class="detail-row">
                 <div class="detail-lbl">CLASSIFICATION</div>
                 <div class="detail-val"><span class="badge ${tx.classification}">${tx.classification}</span></div>
+            </div>
+            <div class="detail-row">
+                <div class="detail-lbl">TRANSACTION FEE</div>
+                <div class="detail-val"><strong>${tx.isCoinbase ? '<span class="badge coinbase">Coinbase (New Coins)</span>' : (tx.fee !== undefined ? formatSats(tx.fee) : '<span class="muted">Data missing</span>')}</strong></div>
             </div>
             ${byteBreakdownHtml}
             ${graphHtml}
@@ -857,5 +894,11 @@ document.addEventListener('DOMContentLoaded', () => {
         emptyState.style.display = 'none';
         dbContent.style.display = 'none';
         loadingState.style.display = 'flex';
+    }
+
+    function formatSats(sats) {
+        if (sats === 0) return '0 sat (0 BTC)';
+        const btc = (sats / 100000000).toFixed(8).replace(/\.?0+$/, "");
+        return `${sats.toLocaleString()} sat (~${btc} BTC)`;
     }
 });

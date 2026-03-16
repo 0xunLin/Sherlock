@@ -2,8 +2,10 @@ function analyzeBlocks(blocks) {
     const fileStats = {
         total_transactions_analyzed: 0,
         flagged_transactions: 0,
+        heuristics_applied: new Set(),
         script_type_distribution: {},
         fee_rates: [],
+        total_fees: 0,
         size_stats: { total_size: 0, base_size: 0, weight: 0, vbytes: 0, version_size: 0, inputs_size: 0, outputs_size: 0, witness_size: 0, locktime_size: 0 }
     };
 
@@ -12,10 +14,11 @@ function analyzeBlocks(blocks) {
     for (const block of blocks) {
         const blockSummary = {
             total_transactions_analyzed: block.txCount,
-            heuristics_applied: ["cioh", "change_detection", "consolidation", "address_reuse", "round_number_payment", "coinjoin", "op_return", "self_transfer", "peeling_chain"],
+            heuristics_applied: new Set(),
             flagged_transactions: 0,
             script_type_distribution: {},
             fee_rates: [],
+            total_fees: 0,
             size_stats: { total_size: 0, base_size: 0, weight: 0, vbytes: 0, version_size: 0, inputs_size: 0, outputs_size: 0, witness_size: 0, locktime_size: 0 }
         };
 
@@ -50,6 +53,7 @@ function analyzeBlocks(blocks) {
                 blockSummary.script_type_distribution[type] = (blockSummary.script_type_distribution[type] || 0) + 1;
                 fileStats.script_type_distribution[type] = (fileStats.script_type_distribution[type] || 0) + 1;
             }
+            let txFee = 0;
             if (!tx.isCoinbase && tx.vins.every(v => v.prevout)) {
                 let totalIn = 0;
                 for (const vin of tx.vins) {
@@ -60,11 +64,13 @@ function analyzeBlocks(blocks) {
                 }
                 let totalOut = 0;
                 for (const vout of tx.vouts) totalOut += vout.value;
-                const feeSats = totalIn - totalOut;
-                const feeRate = feeSats / tx.vbytes;
+                txFee = totalIn - totalOut;
+                const feeRate = txFee / tx.vbytes;
                 if (feeRate >= 0) {
                     blockSummary.fee_rates.push(feeRate);
                     fileStats.fee_rates.push(feeRate);
+                    blockSummary.total_fees += txFee;
+                    fileStats.total_fees += txFee;
                 }
             }
 
@@ -81,6 +87,8 @@ function analyzeBlocks(blocks) {
                 else if (inputCount >= 3) ciohConfidence = 'high';
                 heuristics.cioh = { detected: true, input_count: inputCount, confidence: ciohConfidence };
                 isFlagged = true;
+                blockSummary.heuristics_applied.add("cioh");
+                fileStats.heuristics_applied.add("cioh");
             } else {
                 heuristics.cioh = { detected: false };
             }
@@ -126,7 +134,11 @@ function analyzeBlocks(blocks) {
                 }
             }
             heuristics.change_detection = changeInfo;
-            if (changeDetected) isFlagged = true;
+            if (changeDetected) {
+                isFlagged = true;
+                blockSummary.heuristics_applied.add("change_detection");
+                fileStats.heuristics_applied.add("change_detection");
+            }
 
             // 3. consolidation
             const consolidationDetected = tx.vins.length >= 3 && tx.vouts.length <= 2 && !tx.isCoinbase;
@@ -137,6 +149,8 @@ function analyzeBlocks(blocks) {
                 else if (ratio >= 5) consolConfidence = 'high';
                 heuristics.consolidation = { detected: true, input_count: tx.vins.length, output_count: tx.vouts.length, confidence: consolConfidence };
                 isFlagged = true;
+                blockSummary.heuristics_applied.add("consolidation");
+                fileStats.heuristics_applied.add("consolidation");
             } else {
                 heuristics.consolidation = { detected: false };
             }
@@ -156,6 +170,8 @@ function analyzeBlocks(blocks) {
             if (addressReuseDetected) {
                 heuristics.address_reuse = { detected: true, reused_count: reusedCount, confidence: 'certain' };
                 isFlagged = true;
+                blockSummary.heuristics_applied.add("address_reuse");
+                fileStats.heuristics_applied.add("address_reuse");
             } else {
                 heuristics.address_reuse = { detected: false };
             }
@@ -175,6 +191,8 @@ function analyzeBlocks(blocks) {
                 const hasNonRound = tx.vouts.some((v, i) => v.value > 0 && !roundIndices.includes(i));
                 heuristics.round_number_payment = { detected: true, round_indices: roundIndices, confidence: hasNonRound ? 'high' : 'medium' };
                 isFlagged = true;
+                blockSummary.heuristics_applied.add("round_number_payment");
+                fileStats.heuristics_applied.add("round_number_payment");
             } else {
                 heuristics.round_number_payment = { detected: false };
             }
@@ -204,7 +222,11 @@ function analyzeBlocks(blocks) {
                 }
             }
             heuristics.coinjoin = coinjoinInfo;
-            if (coinjoinDetected) isFlagged = true;
+            if (coinjoinDetected) {
+                isFlagged = true;
+                blockSummary.heuristics_applied.add("coinjoin");
+                fileStats.heuristics_applied.add("coinjoin");
+            }
 
             // 7. op_return
             let opReturnDetected = false;
@@ -227,7 +249,11 @@ function analyzeBlocks(blocks) {
                 }
             }
             heuristics.op_return = opReturnInfo;
-            if (opReturnDetected) isFlagged = true;
+            if (opReturnDetected) {
+                isFlagged = true;
+                blockSummary.heuristics_applied.add("op_return");
+                fileStats.heuristics_applied.add("op_return");
+            }
 
             // 8. self_transfer
             let selfTransferDetected = false;
@@ -248,7 +274,11 @@ function analyzeBlocks(blocks) {
                 }
             }
             heuristics.self_transfer = selfTransferInfo;
-            if (selfTransferDetected) isFlagged = true;
+            if (selfTransferDetected) {
+                isFlagged = true;
+                blockSummary.heuristics_applied.add("self_transfer");
+                fileStats.heuristics_applied.add("self_transfer");
+            }
 
             // 9. peeling_chain
             let peelingChainDetected = false;
@@ -271,7 +301,11 @@ function analyzeBlocks(blocks) {
                 }
             }
             heuristics.peeling_chain = peelingChainInfo;
-            if (peelingChainDetected) isFlagged = true;
+            if (peelingChainDetected) {
+                isFlagged = true;
+                blockSummary.heuristics_applied.add("peeling_chain");
+                fileStats.heuristics_applied.add("peeling_chain");
+            }
 
             if (isFlagged) {
                 fileStats.flagged_transactions++;
@@ -317,6 +351,8 @@ function analyzeBlocks(blocks) {
 
             transactions.push({
                 txid: tx.txid,
+                isCoinbase: tx.isCoinbase,
+                fee: txFee,
                 heuristics,
                 classification,
                 inputs,
@@ -341,10 +377,11 @@ function analyzeBlocks(blocks) {
             tx_count: block.txCount,
             analysis_summary: {
                 total_transactions_analyzed: blockSummary.total_transactions_analyzed,
-                heuristics_applied: blockSummary.heuristics_applied,
+                heuristics_applied: Array.from(blockSummary.heuristics_applied),
                 flagged_transactions: blockSummary.flagged_transactions,
                 script_type_distribution: blockSummary.script_type_distribution,
                 fee_rate_stats: computeStats(blockSummary.fee_rates),
+                total_fees: blockSummary.total_fees,
                 size_stats: blockSummary.size_stats
             },
             transactions
@@ -354,7 +391,7 @@ function analyzeBlocks(blocks) {
     const { fee_rates, ...restStats } = fileStats;
     const finalFileStats = {
         ...restStats,
-        heuristics_applied: ["cioh", "change_detection", "consolidation", "address_reuse", "round_number_payment", "coinjoin", "op_return", "self_transfer", "peeling_chain"],
+        heuristics_applied: Array.from(restStats.heuristics_applied),
         fee_rate_stats: computeStats(fee_rates)
     };
 

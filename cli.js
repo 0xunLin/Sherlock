@@ -176,6 +176,49 @@ try {
                 md += `\n`;
             }
 
+            // ---- Narrative Analysis ----
+            md += `#### Analysis Summary\n\n`;
+
+            // Determine dominant classification
+            const sortedClasses = Object.entries(classCounts).filter(([c]) => c !== 'unknown').sort((a, b) => b[1] - a[1]);
+            const dominant = sortedClasses[0];
+            const flaggedPct = blockObj.txCount > 0 ? (blockRes.analysis_summary.flagged_transactions / blockObj.txCount * 100).toFixed(1) : '0';
+
+            md += `This block contains ${blockObj.txCount.toLocaleString()} transactions, of which ${blockRes.analysis_summary.flagged_transactions.toLocaleString()} (${flaggedPct}%) triggered at least one heuristic. `;
+            if (dominant) {
+                md += `The dominant classification is **${dominant[0]}** at ${(dominant[1] / blockObj.txCount * 100).toFixed(1)}% of all transactions. `;
+            }
+            md += `Change detection fired on ${hc.change_detection.toLocaleString()} transactions (${blockObj.txCount > 0 ? (hc.change_detection / blockObj.txCount * 100).toFixed(1) : '0'}%), and CIOH linked multiple inputs in ${hc.cioh.toLocaleString()} transactions.\n\n`;
+
+            // Highlight specific interesting patterns
+            const narrativeParts = [];
+            if (hc.consolidation > 0) {
+                // Find the largest consolidation (most inputs)
+                const biggestConsol = blockRes.transactions
+                    .filter(t => t.heuristics.consolidation.detected && t.inputs)
+                    .sort((a, b) => b.inputs.length - a.inputs.length)[0];
+                if (biggestConsol && biggestConsol.inputs.length >= 5) {
+                    narrativeParts.push(`The largest consolidation was [\`${biggestConsol.txid.substring(0, 16)}...\`](https://mempool.space/tx/${biggestConsol.txid}) which swept **${biggestConsol.inputs.length} inputs** into ${biggestConsol.outputs.length} output${biggestConsol.outputs.length > 1 ? 's' : ''} — a clear sign of UTXO housekeeping, likely timed for low-fee conditions.`);
+                } else {
+                    narrativeParts.push(`${hc.consolidation} consolidation transactions were detected, indicating active UTXO management in this block.`);
+                }
+            }
+            if (hc.coinjoin > 0) {
+                narrativeParts.push(`${hc.coinjoin} potential CoinJoin transaction${hc.coinjoin > 1 ? 's were' : ' was'} identified, suggesting privacy-seeking activity among some participants.`);
+            }
+            if (hc.op_return > 0) {
+                const opPct = blockObj.txCount > 0 ? (hc.op_return / blockObj.txCount * 100).toFixed(1) : '0';
+                narrativeParts.push(`OP_RETURN outputs appeared in ${hc.op_return} transactions (${opPct}%), indicating non-payment data-embedding activity on-chain.`);
+            }
+            if (hc.peeling_chain > 0) {
+                const peelPct = blockObj.txCount > 0 ? (hc.peeling_chain / blockObj.txCount * 100).toFixed(1) : '0';
+                narrativeParts.push(`Peeling chain patterns were detected in ${hc.peeling_chain} transactions (${peelPct}%), where a large UTXO is repeatedly split into a small payment and large change — a common pattern in exchange withdrawals and mixing services.`);
+            }
+
+            if (narrativeParts.length > 0) {
+                md += narrativeParts.join(' ') + `\n\n`;
+            }
+
             if (i < blocks.length - 1) md += `---\n\n`;
         }
 

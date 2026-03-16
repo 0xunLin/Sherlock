@@ -212,7 +212,7 @@ On the left sidebar, you'll find three utility buttons:
 |---|---|---|
 | 🕵️ | Dashboard | Jump to the dashboard section |
 | **ig** | Information Glossary | Searchable glossary of 40+ Bitcoin and chain-analysis terms |
-| **tt** | Transaction Tracer | Paste a 64-character TXID to instantly locate a transaction in the loaded data |
+| **tt** | Transaction Tracker | Paste a 64-character TXID to instantly locate a transaction in the loaded data |
 | **in** | Import New Block | Upload new `blk`, `rev`, and `xor` files to analyze on-the-fly |
 
 ### Theme Toggle
