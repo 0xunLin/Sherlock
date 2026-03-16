@@ -551,7 +551,17 @@ document.addEventListener('DOMContentLoaded', () => {
         document.getElementById('stat-total').textContent = summary.total_transactions_analyzed.toLocaleString();
         document.getElementById('stat-flagged').textContent = `${summary.flagged_transactions.toLocaleString()} (${flaggedPct}%)`;
         document.getElementById('stat-fee').textContent = summary.fee_rate_stats.mean_sat_vb.toFixed(1);
-        document.getElementById('stat-heuristics').textContent = summary.heuristics_applied.length;
+        const detectedHeuristics = new Set();
+        data.blocks.forEach(b => {
+            b.transactions.forEach(t => {
+                Object.keys(t.heuristics).forEach(h => {
+                    if (t.heuristics[h] && t.heuristics[h].detected) {
+                        detectedHeuristics.add(h);
+                    }
+                });
+            });
+        });
+        document.getElementById('stat-heuristics').textContent = detectedHeuristics.size;
 
         blockNavList.innerHTML = '';
         blocksContainer.innerHTML = '';

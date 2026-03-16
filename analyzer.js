@@ -2,7 +2,7 @@ function analyzeBlocks(blocks) {
     const fileStats = {
         total_transactions_analyzed: 0,
         flagged_transactions: 0,
-        heuristics_applied: new Set(),
+        heuristics_applied: new Set(['cioh', 'change_detection', 'consolidation', 'address_reuse', 'round_number_payment', 'coinjoin', 'op_return', 'self_transfer', 'peeling_chain']),
         script_type_distribution: {},
         fee_rates: [],
         total_fees: 0,
@@ -14,7 +14,7 @@ function analyzeBlocks(blocks) {
     for (const block of blocks) {
         const blockSummary = {
             total_transactions_analyzed: block.txCount,
-            heuristics_applied: new Set(),
+            heuristics_applied: new Set(['cioh', 'change_detection', 'consolidation', 'address_reuse', 'round_number_payment', 'coinjoin', 'op_return', 'self_transfer', 'peeling_chain']),
             flagged_transactions: 0,
             script_type_distribution: {},
             fee_rates: [],
