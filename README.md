@@ -1,335 +1,340 @@
-[![Review Assignment Due Date](https://classroom.github.com/assets/deadline-readme-button-22041afd0340ce965d47ae6ef1cefeee28c7c493a6346c4f15d667ab976d596c.svg)](https://classroom.github.com/a/BKxF-kj7)
-# Week 3 Challenge: Sherlock
+# 🕵️ Sherlock Manual
 
-Build a chain analysis engine that applies chain-analysis heuristics to a dataset of Bitcoin transactions from real block data, a web visualizer to surface and display the results, and Markdown reports documenting your findings.
+A step-by-step guide to installing and using the Sherlock chain analysis engine on your local machine.
 
-This challenge builds on the transaction parser (Challenge 1) and PSBT builder (Challenge 2). You are now applying analytical reasoning on top of parsed transaction data to infer patterns, identify entities, and classify transaction behavior.
+---
 
-This challenge is deliberately open-ended on heuristics. There is no single "right answer" — the quality of your analysis, the rigor of your approach, and the clarity of your documentation are what matter.
+## Table of Contents
+
+1. [Prerequisites](#prerequisites)
+2. [Cloning the Repository](#cloning-the-repository)
+3. [Installation](#installation)
+4. [Running the CLI Analyzer](#running-the-cli-analyzer)
+5. [Viewing the Reports](#viewing-the-reports)
+6. [Launching the Web Visualizer](#launching-the-web-visualizer)
+7. [Using the Web UI](#using-the-web-ui)
+8. [Importing New Block Files](#importing-new-block-files)
+9. [Running the Tests](#running-the-tests)
+10. [Troubleshooting](#troubleshooting)
+
+---
+
+## Prerequisites
+
+Before you begin, ensure you have the following installed on your system:
+
+| Requirement | Minimum Version | Check Command |
+|---|---|---|
+| **Node.js** | v18+ | `node --version` |
+| **npm** | v9+ | `npm --version` |
+| **Bash** | v4+ | `bash --version` |
+| **gunzip** | any | `gunzip --version` |
 
 > [!NOTE]
-> 📖 For a step-by-step guide on installing and using Sherlock on your local machine, see the **[Sherlock Manual](Sherlock_manual.md)**.
+> Sherlock is a pure Node.js project with no native compilation step. It runs on Linux, macOS, and WSL on Windows.
 
 ---
 
-## Assumptions / scope
+## Cloning the Repository
 
-- You **must** parse raw block files (`blk*.dat`, `rev*.dat`, `xor.dat`) to extract transactions and their prevout data, as you did in Challenge 1.
-- You do **not** need to validate signatures or execute scripts.
-- You do **not** need to connect to a node or external API.
-- Heuristics are probabilistic — document your confidence model and limitations in `APPROACH.md`.
-
----
-
-## Deliverables
-
-You must ship **all** of the following:
-
-1. **CLI chain analyzer** — applies heuristics to every transaction in a block and produces machine-readable JSON output.
-2. **Markdown reports** — human-readable reports summarizing the analysis for each block file. Must be committed to `out/`.
-3. **Web visualizer** — interactive UI for exploring chain analysis results.
-4. **APPROACH.md** — documents your heuristics, architecture, trade-offs, and references.
-5. **Demo video** — a screen recording of your web UI walkthrough, linked in `demo.md`.
+```bash
+git clone https://github.com/SummerOfBitcoin/2026-developer-challenge-3-sherlock-0xunLin.git
+cd 2026-developer-challenge-3-sherlock-0xunLin
+```
 
 ---
 
-## Required repo interface
+## Installation
 
-Your repository must include these scripts:
+Run the setup script **once** to install all dependencies and decompress the block fixture files:
 
-### 1) `cli.sh`
+```bash
+# 1. Install Node.js dependencies
+npm install
+
+# 2. Decompress fixtures and finalize setup
+./setup.sh
+```
+
+**What `setup.sh` does:**
+- Decompresses all `fixtures/*.dat.gz` files into their corresponding `.dat` files (if not already present).
+- The fixture files include real Bitcoin block data (`blk04330.dat`, `blk05051.dat`) along with their undo files (`rev*.dat`) and the XOR key (`xor.dat`).
+
+After this step, your `fixtures/` directory should contain:
+
+```
+fixtures/
+├── blk04330.dat        # ~133 MB block data
+├── blk04330.dat.gz
+├── blk05051.dat        # ~133 MB block data
+├── blk05051.dat.gz
+├── rev04330.dat         # undo/prevout data
+├── rev04330.dat.gz
+├── rev05051.dat
+├── rev05051.dat.gz
+└── xor.dat              # 8-byte XOR decryption key
+```
+
+---
+
+## Running the CLI Analyzer
+
+The CLI reads raw block files, applies 9 chain-analysis heuristics, and produces both JSON and Markdown outputs.
+
+### Basic Usage
 
 ```bash
 ./cli.sh --block <blk.dat> <rev.dat> <xor.dat>
 ```
 
-- Reads the block data files and applies chain analysis heuristics.
-- Writes per-block-file outputs (where `<blk_stem>` is the blk filename without extension, e.g., `blk04330`):
-  - `out/<blk_stem>.json` — machine-readable analysis report
-  - `out/<blk_stem>.md` — human-readable Markdown report
-- A single `blk*.dat` file may contain **multiple blocks**. Both the JSON and Markdown outputs should cover all blocks in the file.
-- The `out/` directory must be created if it does not exist.
-- Exits `0` on success, `1` on error.
-- Errors must be returned as structured JSON: `{ "ok": false, "error": { "code": "...", "message": "..." } }`
+### Analyzing the Provided Fixtures
 
-### 2) `web.sh`
+```bash
+# Analyze block file blk04330
+./cli.sh --block fixtures/blk04330.dat fixtures/rev04330.dat fixtures/xor.dat
 
-- Starts the web visualizer.
-- Must print a single line containing the URL (e.g. `http://127.0.0.1:3000`) to stdout.
-- Must keep running until terminated (CTRL+C / SIGTERM).
-- Must honor `PORT` if set (default `3000`).
-- Must serve `GET /api/health` → `200 { "ok": true }`.
-
-### 3) `setup.sh`
-
-- Installs project dependencies.
-- Decompresses block fixture files (`fixtures/*.dat.gz`).
-- Run once before grading.
-
----
-
-## JSON output schema
-
-Each `out/<blk_stem>.json` must conform to the following schema. Since a single `blk*.dat` file may contain multiple blocks, the output wraps per-block data in a `blocks` array with a file-level aggregated summary:
-
-```json
-{
-  "ok": true,
-  "mode": "chain_analysis",
-  "file": "blk04330.dat",
-  "block_count": 2,
-  "analysis_summary": {
-    "total_transactions_analyzed": 4500,
-    "heuristics_applied": ["cioh", "change_detection", "..."],
-    "flagged_transactions": 120,
-    "script_type_distribution": {
-      "p2wpkh": 2100,
-      "p2tr": 900,
-      "p2sh": 300,
-      "p2pkh": 150,
-      "p2wsh": 60,
-      "op_return": 40,
-      "unknown": 10
-    },
-    "fee_rate_stats": {
-      "min_sat_vb": 1.0,
-      "max_sat_vb": 800.0,
-      "median_sat_vb": 28.0,
-      "mean_sat_vb": 45.2
-    }
-  },
-  "blocks": [
-    {
-      "block_hash": "<hex64>",
-      "block_height": 800000,
-      "tx_count": 3000,
-      "analysis_summary": {
-        "total_transactions_analyzed": 3000,
-        "heuristics_applied": ["cioh", "change_detection", "..."],
-        "flagged_transactions": 80,
-        "script_type_distribution": {
-          "p2wpkh": 1200,
-          "p2tr": 500,
-          "p2sh": 200,
-          "p2pkh": 80,
-          "p2wsh": 30,
-          "op_return": 20,
-          "unknown": 5
-        },
-        "fee_rate_stats": {
-          "min_sat_vb": 1.0,
-          "max_sat_vb": 800.0,
-          "median_sat_vb": 30.0,
-          "mean_sat_vb": 50.1
-        }
-      },
-      "transactions": [
-        {
-          "txid": "<hex64>",
-          "heuristics": {
-            "cioh": {
-              "detected": true
-            },
-            "change_detection": {
-              "detected": true,
-              "likely_change_index": 1,
-              "method": "script_type_match",
-              "confidence": "high"
-            }
-          },
-          "classification": "simple_payment"
-        }
-      ]
-    }
-  ]
-}
+# Analyze block file blk05051
+./cli.sh --block fixtures/blk05051.dat fixtures/rev05051.dat fixtures/xor.dat
 ```
 
-### Field requirements
+### What It Produces
 
-**Top-level fields:**
+For each block file, two output files are written to `out/`:
 
-- `ok`: boolean, `true` on success.
-- `mode`: string, always `"chain_analysis"`.
-- `file`: string, the source block filename (e.g., `"blk04330.dat"`).
-- `block_count`: integer, must equal the length of the `blocks` array.
-- `analysis_summary`: file-level aggregated summary (see below).
-- `blocks`: array of per-block analysis results.
+| Output File | Description |
+|---|---|
+| `out/blk04330.json` | Machine-readable JSON with per-transaction heuristic results |
+| `out/blk04330.md` | Human-readable Markdown report with summaries and statistics |
 
-**File-level `analysis_summary`:**
+### Exit Codes
 
-- `total_transactions_analyzed`: integer, must equal the sum of all `blocks[].tx_count`.
-- `heuristics_applied`: array of heuristic IDs applied. Must be the union of all per-block `heuristics_applied`. Must contain at least 5 distinct IDs, including `"cioh"` and `"change_detection"`.
-- `flagged_transactions`: integer, must equal the sum of all `blocks[].analysis_summary.flagged_transactions`.
-- `fee_rate_stats`: fee rate statistics computed across all non-coinbase transactions in all blocks. `min_sat_vb` ≤ `median_sat_vb` ≤ `max_sat_vb`, all non-negative.
+| Code | Meaning |
+|---|---|
+| `0` | Success |
+| `1` | Error (details printed as structured JSON to stderr) |
 
-**Per-block fields (each element of `blocks[]`):**
-
-- `block_hash`: hex string (64 chars), standard reversed-hex display convention.
-- `block_height`: integer, decoded from coinbase BIP34.
-- `tx_count`: integer, total number of transactions in the block.
-- `analysis_summary`: per-block summary, same shape as file-level summary. `total_transactions_analyzed` must equal `tx_count`. `flagged_transactions` must match the actual count of transactions with at least one `detected: true` heuristic.
-- `transactions`: array of per-transaction analysis results. **Required for the first block** (`blocks[0]`): the grader validates that the array exists and its length equals `tx_count`. **Optional for subsequent blocks** — you may omit it or use an empty array to reduce JSON size and speed up grading.
-
-**Per-transaction fields (each element of `blocks[].transactions[]`):**
-
-- `txid`: hex string (64 chars).
-- `heuristics`: object mapping heuristic ID → result object. Each result must have a `detected` boolean field.
-- `classification`: one of `"simple_payment"`, `"consolidation"`, `"coinjoin"`, `"self_transfer"`, `"batch_payment"`, `"unknown"`.
-
-> **Note:** The automated grader validates the `transactions` array (existence + length) for the first block only. Including full per-transaction data for all blocks is encouraged for your own analysis and web UI, but not required for grading.
+> [!TIP]
+> The JSON output for large blocks can exceed 200 MB. Sherlock streams the output to avoid memory issues.
 
 ---
 
-## Markdown report requirements
+## Viewing the Reports
 
-For each block file, generate a Markdown report at `out/<blk_stem>.md` (e.g., `out/blk04330.md`). The report renders directly on GitHub and should include:
+After running the CLI, open the generated Markdown reports directly on GitHub or locally:
 
-- **File overview:** source filename, number of blocks, total transactions analyzed.
-- **Summary statistics:** fee rate distribution, script type breakdown, flagged transaction count (aggregated across all blocks in the file).
-- **Per-block sections:** for each block in the file:
-  - Block hash, height, timestamp, transaction count.
-  - Per-heuristic findings: which heuristics fired and on how many transactions.
-  - Notable transactions: highlight transactions classified as coinjoin, consolidation, or other interesting patterns.
+```bash
+# View the Markdown report in your terminal (requires a Markdown viewer)
+cat out/blk04330.md
 
-Use Markdown tables and headers for structure. The report must be at least 1 KB in size (i.e., not empty or trivially generated).
+# Or open in your browser (if using VS Code)
+code out/blk04330.md
+```
 
-**Important:** Markdown reports must be committed to the `out/` directory. The grader checks that committed reports exist and are reproducible (re-running `cli.sh` should produce reports of similar content).
+The reports include:
+- File overview (source filename, block count, total transactions)
+- Summary statistics (fee rates, script type distribution, flagged transaction counts)
+- Per-block sections with heuristic findings and notable transactions
 
 ---
 
-## Heuristic catalogue
+## Launching the Web Visualizer
 
-You must implement **at least 5** of the following heuristics. The `cioh` and `change_detection` heuristics are **mandatory**.
+Start the interactive web dashboard:
 
-| ID | Name | Description |
+```bash
+./web.sh
+```
+
+This will print a URL to stdout (default: `http://127.0.0.1:3000`) and keep the server running.
+
+**Open your browser** and navigate to the printed URL.
+
+### Custom Port
+
+To run on a different port:
+
+```bash
+PORT=8080 ./web.sh
+```
+
+### Stopping the Server
+
+Press `Ctrl+C` in the terminal where the server is running.
+
+### Health Check
+
+Verify the server is running:
+
+```bash
+curl http://127.0.0.1:3000/api/health
+# Expected: {"ok":true}
+```
+
+---
+
+## Using the Web UI
+
+The Sherlock web visualizer is a scrollytelling interface with three main sections:
+
+### 1. Hero Section
+
+The landing page features an interactive **Heuristics Dictionary** — a carousel of cards explaining each chain-analysis concept (CIOH, change detection, CoinJoin, etc.). Click the **`>`** arrow button to cycle through definitions.
+
+### 2. Heuristics Showcase
+
+Scroll down to see three phone mockup cards illustrating the three core heuristics:
+- **CIOH** — Common Input Ownership
+- **Change Detection** — identifying change outputs
+- **CoinJoin** — collaborative privacy transactions
+
+### 3. Dashboard
+
+This is the main analysis interface. Here's how to use it:
+
+1. **Select a block file** from the dropdown in the header bar (e.g., `blk04330.dat`).
+2. **View block-level statistics**: total transactions, flagged count, average fee rate, and number of heuristics applied.
+3. **Navigate between blocks** using the tab bar. If there are more than 10 blocks, click "More Blocks ▾" to see all.
+4. **Filter transactions** using the "Filter Txs" dropdown:
+   - *By Classification*: Simple Payment, Consolidation, CoinJoin, Self Transfer, Batch Payment
+   - *By Heuristic*: CIOH, Change Detection, Address Reuse, Round Number Payment, OP_RETURN, Peeling Chain, and more
+5. **Click any TXID** in the transaction table to open a detailed modal showing:
+   - Full TXID (linked to mempool.space)
+   - Classification badge
+   - Transaction graph (inputs → outputs with script types and BTC values)
+   - Byte breakdown bar
+   - All heuristics that fired, with raw JSON details
+
+### Sidebar Tools
+
+On the left sidebar, you'll find three utility buttons:
+
+| Button | Name | Description |
 |---|---|---|
-| `cioh` | Common Input Ownership | All inputs to a transaction likely belong to the same entity. This is the foundational chain analysis assumption: if multiple inputs are spent together, they are probably controlled by the same wallet. Flag transactions with multiple inputs. |
-| `change_detection` | Change Detection | Identify the likely change output in a transaction. Methods include: script type matching (change output matches input script type), round number analysis (payment amounts tend to be round), output ordering heuristics, and value analysis. Report the likely change index, method used, and confidence level. |
-| `address_reuse` | Address Reuse | Detect when the same address appears in both inputs and outputs of a transaction, or across multiple transactions within the same block. Address reuse weakens privacy and links transactions to the same entity. |
-| `coinjoin` | CoinJoin Detection | Identify CoinJoin transactions: multiple inputs from apparently different owners, equal-value outputs designed to obscure the transaction graph. Look for symmetric output values and high input counts. |
-| `consolidation` | Consolidation Detection | Detect consolidation transactions: many inputs combined into 1-2 outputs, typically of the same script type. These reduce UTXO set size and are common wallet maintenance operations. |
-| `self_transfer` | Self-Transfer Detection | Identify transactions where all inputs and outputs appear to belong to the same entity. All outputs match the input script type pattern, and the transaction has no obvious "payment" component. |
-| `peeling_chain` | Peeling Chain Detection | Detect peeling chain patterns: a large input is split into one small output (payment) and one large output (change), with the large output being spent in a subsequent transaction following the same pattern. |
-| `op_return` | OP_RETURN Analysis | Detect OP_RETURN outputs and classify the embedded data by protocol (Omni, OpenTimestamps, etc.). Track usage patterns within the block. |
-| `round_number_payment` | Round Number Payment | Identify outputs with values that are round BTC amounts (e.g., 0.1 BTC, 0.01 BTC, 1 BTC). Round-number outputs are more likely to be payments; non-round outputs are more likely to be change. |
+| 🕵️ | Dashboard | Jump to the dashboard section |
+| **ig** | Information Glossary | Searchable glossary of 40+ Bitcoin and chain-analysis terms |
+| **tt** | Transaction Tracker | Paste a 64-character TXID to instantly locate a transaction in the loaded data |
+| **in** | Import New Block | Upload new `blk`, `rev`, and `xor` files to analyze on-the-fly |
+
+### Theme Toggle
+
+Click the **MODERN MODE / VICTORIAN MODE** button at the top center to switch between:
+- **Victorian Mode** (default) — dark sepia detective aesthetic with serif typography
+- **Modern Mode** — clean, light, data-dense layout
 
 ---
 
-## APPROACH.md requirements
+## Importing New Block Files
 
-You must include an `APPROACH.md` file in the repository root that documents:
+You can analyze new block files directly from the web UI without using the command line:
 
-1. **Heuristics Implemented** — for each heuristic:
-   - What it detects
-   - How you detect/compute it
-   - Your confidence model (how you assess reliability)
-   - Known limitations (false positives, false negatives, edge cases)
-2. **Architecture overview** — how your code is organized, what languages/frameworks you used, how data flows from raw block files to JSON + Markdown output.
-3. **Trade-offs and design decisions** — accuracy vs performance, simplicity vs coverage, and any other significant choices.
-4. **References** — BIPs, papers, blog posts, or documentation you used.
+1. Click the **`in`** button on the left sidebar.
+2. Select the three required `.dat` files:
+   - **BLK FILE** — the `blk*.dat` block data
+   - **REV FILE** — the `rev*.dat` undo data
+   - **XOR FILE** — the `xor.dat` decryption key
+3. Click **ANALYZE FILES**.
+4. The server will run the CLI engine, generate the JSON and Markdown outputs, and automatically load the results in the dashboard.
 
-The file must be at least 500 bytes.
-
----
-
-## Web visualizer requirements
-
-Your web app must:
-
-- Provide an interactive view of chain analysis results for a block.
-- Allow users to explore individual transactions and their heuristic results.
-- Visualize patterns: highlight CoinJoins, consolidations, flagged transactions.
-- Display block-level statistics: fee rate distribution, script type breakdown.
-- Serve `GET /api/health` → `200 { "ok": true }`.
-
-Recommended features (not strictly required but strongly encouraged):
-
-- Color-coded transaction classifications.
-- Interactive filtering by heuristic or classification.
-- Visual transaction graph showing input/output relationships.
-- Click-to-expand details for each transaction's heuristic results.
+> [!IMPORTANT]
+> All three files must be provided. The XOR key (`xor.dat`) is shared across all block files in the same data directory.
 
 ---
 
-## Committed outputs
+## Running the Tests
 
-Unlike Challenges 1 and 2, you **must commit the `out/` directory** to your repository. This directory should contain:
+Sherlock includes unit tests for the analyzer, CLI, and server:
 
-- `out/<blk_stem>.json` for each block file in the fixtures (e.g., `out/blk04330.json`).
-- `out/<blk_stem>.md` for each block file in the fixtures (e.g., `out/blk04330.md`).
+```bash
+# Run all tests
+npm test
 
-The grader verifies that these files exist and are reproducible.
+# Run tests with coverage
+npx jest --coverage
+```
 
----
+### Grading Script
 
-## Demo video
+To run the automated grading checks:
 
-Include a link to your demo video in `demo.md` at the repository root. The file should contain only the link.
+```bash
+./grade.sh
+```
 
-- **Where to upload:** YouTube, Loom, or Google Drive. The link must be viewable by evaluators without requesting access (public or unlisted is fine; no "request access" links).
-- **What to record:** a screen recording of your **web UI** walkthrough (no code walkthrough; don't spend time scrolling through source files).
-- **What to demonstrate:** use your UI to analyze at least one block from the provided fixtures and walk through the chain analysis results.
-- **How to explain:** speak as if to a non-technical person who wants to understand what chain analysis reveals about Bitcoin transactions.
-- **Topics your walkthrough must cover (using the UI):**
-  - What chain analysis is and why it matters for Bitcoin privacy
-  - Common Input Ownership Heuristic — what it assumes and what it reveals
-  - Change detection — how your tool identifies likely change outputs
-  - At least one other heuristic you implemented and what it found
-  - Transaction classification — how your tool categorizes transactions
-  - Block-level statistics — fee rates, script type distribution, flagged transaction counts
-  - A specific interesting transaction from the block data and what your analysis reveals about it
-- **Hard limit:** the video must be strictly **less than 2 minutes** long.
+This validates JSON schema compliance, heuristic coverage, report reproducibility, and web server health.
 
 ---
 
-## Acceptance criteria
+## Troubleshooting
 
-- `cli.sh --block` succeeds on all provided block fixtures
-- CLI JSON output matches the required schema (all fields present, correct types, valid enums)
-- `block_count` matches the length of the `blocks` array
-- File-level aggregated summary is consistent with per-block summaries
-- At least 5 heuristics are applied per block, including `cioh` and `change_detection`
-- `transactions` array is present and correct for the first block (length == `tx_count`)
-- `flagged_transactions` count is consistent (per-block values are valid, file-level sum matches)
-- Fee rate statistics are consistent (min ≤ median ≤ max, all non-negative)
-- Markdown reports exist in `out/` for each block file and are reproducible
-- `APPROACH.md` exists and documents at least 5 heuristics
-- Web app launches via `web.sh` and serves `GET /api/health` → `200 { "ok": true }`
-- Demo video link is included in `demo.md`
-- Errors are returned as structured JSON with non-empty `error.code` and `error.message`
+### `./cli.sh: Permission denied`
+
+```bash
+chmod +x cli.sh web.sh setup.sh
+```
+
+### `gunzip: command not found`
+
+Install gzip:
+```bash
+# Debian/Ubuntu
+sudo apt-get install gzip
+
+# macOS (usually pre-installed)
+brew install gzip
+```
+
+### `Cannot find module 'express'`
+
+You forgot to install dependencies:
+```bash
+npm install
+```
+
+### JSON output is very large / slow
+
+This is expected for blocks with 3000+ transactions. The CLI streams output to manage memory. The JSON file for `blk04330` is ~300 MB. Ensure you have sufficient disk space.
+
+### Web UI shows "No analyzed files found"
+
+Run the CLI first to generate the `out/*.json` files, then refresh the web page:
+```bash
+./cli.sh --block fixtures/blk04330.dat fixtures/rev04330.dat fixtures/xor.dat
+```
+
+### Port already in use
+
+```bash
+PORT=3001 ./web.sh
+```
 
 ---
 
-## Evaluation criteria
+## Project Structure
 
-Evaluation happens in two phases:
-
-### Phase 1: Automated evaluation (before deadline)
-
-- **Schema validation:** JSON output is checked for required fields, correct types, and valid values.
-- **Heuristic coverage:** at least 5 heuristics applied, `cioh` and `change_detection` mandatory.
-- **Transaction validation:** `transactions` array is validated for the first block only (type check + length == tx_count). Subsequent blocks may omit it.
-- **Consistency checks:** `flagged_transactions` is valid (0 ≤ n ≤ tx_count), fee rate stats are ordered correctly, file-level aggregation matches per-block data.
-- **Report reproducibility:** committed Markdown reports exist and re-running `cli.sh` produces similar reports.
-- **Documentation:** `APPROACH.md` exists, is substantial (>500 bytes), and covers at least 5 heuristics. `demo.md` contains a valid video link.
-- **Web health check:** `web.sh` must start and respond to `GET /api/health`.
-
-### Phase 2: Manual evaluation (after deadline)
-
-- **Heuristic quality:** are the heuristics well-reasoned? Do they produce meaningful results? Are confidence levels appropriate?
-- **Report quality:** clarity, completeness, and presentation of findings in the Markdown reports.
-- **Web UI quality:** interactivity, visual design, and how well it surfaces analysis results.
-- **APPROACH.md quality:** depth of explanation, awareness of limitations, quality of references.
-- **Demo video:** coverage of required topics, clarity of explanation, adherence to the 2-minute limit.
-- **Code quality:** readability, structure, and appropriate use of abstractions.
+```
+.
+├── cli.sh              # CLI entry point (bash wrapper)
+├── cli.js              # CLI logic (Node.js)
+├── parser.js           # Raw block file parser
+├── analyzer.js         # 9 chain-analysis heuristics
+├── server.js           # Express web server + API
+├── setup.sh            # Dependency installer
+├── web.sh              # Web server launcher
+├── grade.sh            # Automated grading script
+├── APPROACH.md         # Heuristic documentation
+├── MANUAL.md           # This file
+├── demo.md             # Demo video link
+├── fixtures/           # Compressed block data fixtures
+├── out/                # Generated JSON + Markdown reports
+├── public/             # Web visualizer (HTML/CSS/JS)
+│   ├── index.html
+│   ├── app.js
+│   ├── style.css
+│   ├── manual.html
+│   └── fonts/
+└── tests/              # Jest unit tests
+```
 
 ---
 
-## Plagiarism policy
-
-- All submitted code must be your own original work. You may use AI coding assistants (e.g. GitHub Copilot, ChatGPT, Claude) as tools, but you must understand and be able to explain every part of your submission.
-- Copying code from other participants' submissions (current or past cohorts) is strictly prohibited.
-- Using open-source libraries and referencing public documentation (BIPs, papers, blog posts, etc.) is encouraged — that is research, not plagiarism.
-- Submissions will be checked for similarity against other participants. If two or more submissions share substantially identical logic or structure beyond what would arise from following the spec, all involved submissions may be disqualified.
-- If you are unsure whether something counts as plagiarism, ask before submitting.
+*Built with ☕ and Node.js. No external APIs, no build step, no frameworks — just pure JavaScript.*
